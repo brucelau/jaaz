@@ -98,8 +98,8 @@ When the user describes an air-mold design (气模), including but not limited t
 
 Steps:
 1. Call enhance_airmold_prompt with the user's description
-2. Use the enhanced prompt from the result for image generation
-3. This ensures professional quality with proper material, structure, color, and composition details
+2. Optionally call score_airmold_prompt to evaluate the enhanced prompt
+3. Use the enhanced prompt for image generation
 
 Example:
 User: "生成一个卡通风格的红色大气模"
@@ -109,6 +109,15 @@ enhance_airmold_prompt("卡通风格的红色大气模")
 Enhanced result includes: material (PVC), structure, color palette, lighting, composition
 ↓
 generate_image_by_ideogram(enhanced_prompt)
+
+PROMPT QUALITY CHECK:
+After enhancing a prompt, you can use score_airmold_prompt to check quality.
+If score is low (< 3.5), use enhance_airmold_prompt again with error feedback to refine.
+
+ITERATIVE IMPROVEMENT:
+If image generation has issues (e.g., wrong material, poor composition):
+1. Call refine_airmold_prompt with the current prompt and error feedback
+2. Use the refined prompt for next generation attempt
 """
 
 full_system_prompt = (

@@ -1,0 +1,82 @@
+{
+  "Quantity Errors": {
+    "refinement": "强调数量关键词，使用'精确'、'正好'、'exactly'等词强化数量描述",
+    "example": "原: 多个红色气模; 优化后: exactly 5个红色气模，均匀分布"
+  },
+  "Spatial Positioning Errors": {
+    "refinement": "明确空间关系，使用具体坐标、角度、距离描述",
+    "example": "原: 气模在左边; 优化后: 气模位于画面左侧，距中心线30度角"
+  },
+  "Material Errors": {
+    "refinement": "明确指定材质属性，如PVC/TPU/Dacron的物理特性",
+    "example": "原: 塑料质感; 优化后: PVC材质，表面光滑，有轻微光泽，防水耐用"
+  },
+  "Color Errors": {
+    "refinement": "使用精确色标描述，如Pantone色号或具体颜色名称",
+    "example": "原: 红色气模; 优化后: 正红色(Pantone 485C)气模"
+  },
+  "Texture Errors": {
+    "refinement": "详细描述表面纹理，使用专业纹理术语",
+    "example": "原: 有纹理; 优化后: 细腻压纹PVC面料，表面有均匀凸点纹理"
+  },
+  "Shape Errors": {
+    "refinement": "重复强调形状特征，添加详细形状描述",
+    "example": "原: 圆形气模; 优化后: 标准圆形气模，边缘圆润无棱角"
+  },
+  "Proportion Errors": {
+    "refinement": "明确尺寸比例关系，添加参考尺寸",
+    "example": "原: 大型气模; 优化后: 大型气模，高度3米，宽度2米，比例1:1.5"
+  },
+  "Structure Errors": {
+    "refinement": "强调充气结构特性，如接缝、底座、风机位置",
+    "example": "原: 充气结构; 优化后: 立体充气结构，双重接缝加固，底部配重沙袋"
+  },
+  "Lighting Errors": {
+    "refinement": "明确光源方向、强度、色温",
+    "example": "原: 明亮; 优化后: 45度侧光，光强度高，暖色调(5500K)"
+  },
+  "Shadow Errors": {
+    "refinement": "明确阴影位置、深度、方向",
+    "example": "原: 有阴影; 优化后: 气模底部有柔和阴影，向右延伸15度"
+  },
+  "Style Errors": {
+    "refinement": "统一风格关键词，强调风格一致性",
+    "example": "原: 卡通风格; 优化后: 高饱和卡通风格，明亮配色，圆润线条"
+  },
+  "Composition Errors": {
+    "refinement": "明确构图方式，使用专业构图术语",
+    "example": "原: 居中; 优化后: 画面中央三分法构图，气模位于黄金分割点"
+  },
+  "Detail Errors": {
+    "refinement": "强调细节描述，添加具体细节特征",
+    "example": "原: 有装饰; 优化后: 表面有立体印花装饰，logo位于气模前部中央"
+  },
+  "Background Errors": {
+    "refinement": "明确背景描述，添加背景元素细节",
+    "example": "原: 白色背景; 优化后: 纯白色无纹理背景，与气模形成高对比"
+  },
+  "Weather Resistance Errors": {
+    "refinement": "强调耐候性特征，如防紫外线、防水、耐温",
+    "example": "原: 户外使用; 优化后: 抗UV涂层，防水处理，耐温-20°C至50°C"
+  },
+  "Safety Errors": {
+    "refinement": "明确安全特性，如防滑、防火、接地",
+    "example": "原: 安全; 优化后: 防滑底座设计，阻燃材料，配接地线"
+  },
+  "Durability Errors": {
+    "refinement": "强调耐用特性，如抗撕裂、耐磨、加固",
+    "example": "原: 耐用; 优化后: 600D涤纶面料，四重缝线加固，抗撕裂"
+  },
+  "Installation Errors": {
+    "refinement": "明确安装方式，描述固定方式",
+    "example": "原: 易安装; 优化后: 配有快速挂钩系统，充气后自动站立"
+  },
+  "Visibility Errors": {
+    "refinement": "强调可视性特征，如夜间反光、颜色醒目",
+    "example": "原: 醒目; 优化后: 高对比配色，3M反光条，夜间可视距离100米"
+  },
+  "Brand Errors": {
+    "refinement": "明确品牌标识位置、大小、样式",
+    "example": "原: 有logo; 优化后: 品牌logo位于气模正面，高度30cm，丝网印刷"
+  }
+}
