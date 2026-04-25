@@ -3,6 +3,7 @@ from .matcher import PatternMatcher, MatchedPattern
 from .enhancer import PromptEnhancer, EnhancementResult
 from .refinement import RefinementEngine, get_refinement_engine
 from .scorer import AirMoldScorer, AirMoldScore, get_scorer
+from .vqa_checker import VQAChecker, get_vqa_checker
 
 __all__ = [
     "PatternDatabase",
@@ -17,4 +18,6 @@ __all__ = [
     "AirMoldScorer",
     "AirMoldScore",
     "get_scorer",
+    "VQAChecker",
+    "get_vqa_checker",
 ]

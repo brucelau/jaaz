@@ -1,0 +1,115 @@
+# PneumatCraft Enhancement - TODO
+
+## 概述
+基于 GenPilot + PneumatCraft 的 patterns 机制，为 jaaz 添加气模设计 prompt 增强功能。
+
+## 已完成
+
+### Phase 1: Pattern 匹配 + 增强 ✅
+- [x] `server/tools/patterns/database.py` - PatternDatabase 数据结构
+- [x] `server/tools/patterns/matcher.py` - PatternMatcher 关键词匹配
+- [x] `server/tools/patterns/enhancer.py` - PromptEnhancer 增强生成
+- [x] `server/tools/patterns/design_patterns.json` - 气模设计规范知识库
+- [x] `server/tools/enhance_airmold_prompt.py` - LangGraph 工具
+- [x] `server/services/tool_service.py` - 工具注册
+- [x] `server/services/langgraph_service/configs/image_vide_creator_config.py` - System prompt 更新
+
+### Phase 2: Refinement + Scoring ✅
+- [x] `server/tools/patterns/error_patterns.json` - 20种错误类型及修正策略
+- [x] `server/tools/patterns/refinement.py` - RefinementEngine 错误修正引擎
+- [x] `server/tools/patterns/scorer.py` - AirMoldScorer 评分引擎
+- [x] `refine_airmold_prompt` 工具 - 基于错误反馈修正 prompt
+- [x] `score_airmold_prompt` 工具 - 四维度评分
+
+## 待完成
+
+### Phase 3: VQA 错误检查集成
+- [ ] `server/tools/patterns/vqa_checker.py` - VQA 图像检查器
+  - 基于 LLM + 图像做 QA 检查
+  - 检查材质、结构、颜色等是否与 prompt 一致
+- [ ] `server/tools/patterns/feedback_collector.py` - 错误反馈收集器
+  - 从 VQA 结果提取错误类型
+  - 生成 error_feedback 列表
+- [ ] 集成 VQA 到 enhance_airmold_prompt 流程
+- [ ] 更新 ImageVideoCreator prompt 添加 VQA 检查指引
+
+### Phase 4: 端到端测试
+- [ ] 测试 enhance_airmold_prompt 工具链
+- [ ] 测试 refine_airmold_prompt 迭代修正
+- [ ] 测试 score_airmold_prompt 评分
+- [ ] 测试 VQA 错误检查流程
+- [ ] 性能优化（缓存、并行的候选生成）
+
+### Phase 5: 高级功能（可选）
+- [ ] 聚类选择机制（GenPilot 的 K-Means 聚类）
+- [ ] 多候选生成 + 贝叶斯更新
+- [ ] 历史记忆系统
+- [ ] 用户反馈学习
+
+## 错误类型定义
+
+参考 `server/tools/patterns/error_patterns.json`:
+
+| ID | 错误类型 | 描述 |
+|----|----------|------|
+| 1 | Quantity Errors | 数量描述错误 |
+| 2 | Spatial Positioning Errors | 空间位置错误 |
+| 3 | Material Errors | 材质选择错误 |
+| 4 | Color Errors | 颜色偏差 |
+| 5 | Texture Errors | 表面纹理不对 |
+| 6 | Shape Errors | 形状失真 |
+| 7 | Proportion Errors | 比例失调 |
+| 8 | Structure Errors | 结构不合理 |
+| 9 | Lighting Errors | 光影错误 |
+| 10 | Shadow Errors | 阴影错误 |
+| 11 | Style Errors | 风格不一致 |
+| 12 | Composition Errors | 构图问题 |
+| 13 | Detail Errors | 细节缺失 |
+| 14 | Background Errors | 背景问题 |
+| 15 | Weather Resistance Errors | 耐候性错误 |
+| 16 | Safety Errors | 安全问题 |
+| 17 | Durability Errors | 耐用性问题 |
+| 18 | Installation Errors | 安装问题 |
+| 19 | Visibility Errors | 可视性问题 |
+| 20 | Brand Errors | 品牌标识错误 |
+
+## 设计规范分类
+
+参考 `server/tools/patterns/design_patterns.json`:
+
+### Styles (风格)
+- 卡通、简约、写实、梦幻、科技
+
+### Products (产品)
+- 气模拱门、气模人偶、气模卡通、气模玩具、大气模
+- 气模滑梯、气模水池、气模蹦床、气模广告、节日气模
+
+### Colors (颜色)
+- 蓝色系、黄色系、红粉色系、绿青色系、紫灰色系、橙粉色系、白黑色系
+
+### Materials (材质)
+- PVC、TPU、Dacron、尼龙、网布
+
+## 评分维度
+
+| 维度 | 描述 | 权重 |
+|------|------|------|
+| material_accuracy | 材质准确性 | 1.0 |
+| structural_soundness | 结构合理性 | 1.0 |
+| visual_quality | 视觉质量 | 1.0 |
+| color_accuracy | 颜色准确性 | 1.0 |
+
+Pass 标准: overall >= 3.5
+
+## 技术债务
+
+- [ ] scorer.py 的 rule-based 评分过于简单，需要更复杂的权重计算
+- [ ] refinement.py 的规则修正尚未真正实现 _apply_refinement 逻辑
+- [ ] 没有错误边界处理
+- [ ] 没有超时处理
+
+## 参考资料
+
+- GenPilot: `/Users/cyberway/ocworkspace/GenPilot/`
+- PneumatCraft: `/Users/cyberway/ocworkspace/pneumatcraft/`
+- jaaz main: `/Users/cyberway/ocworkspace/jaaz/`

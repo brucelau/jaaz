@@ -118,6 +118,20 @@ ITERATIVE IMPROVEMENT:
 If image generation has issues (e.g., wrong material, poor composition):
 1. Call refine_airmold_prompt with the current prompt and error feedback
 2. Use the refined prompt for next generation attempt
+
+VQA IMAGE CHECK:
+After generating an image, you can use check_airmold_image to verify quality:
+1. Call check_airmold_image with the image path and original prompt
+2. Review the error feedback
+3. If errors are found, use refine_airmold_prompt to fix them
+4. Regenerate the image with the refined prompt
+
+Workflow Example:
+1. enhance_airmold_prompt("卡通风格的红色大气模")
+2. generate_image_by_ideogram(enhanced_prompt)
+3. check_airmold_image(image_path, enhanced_prompt)
+4. If errors found: refine_airmold_prompt(enhanced_prompt, error_feedback)
+5. Regenerate with refined prompt
 """
 
 full_system_prompt = (

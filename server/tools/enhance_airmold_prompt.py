@@ -9,6 +9,8 @@ from patterns import (
     get_refinement_engine,
     AirMoldScorer,
     get_scorer,
+    VQAChecker,
+    get_vqa_checker,
 )
 
 
@@ -38,6 +40,19 @@ class RefinePromptInputSchema(BaseModel):
 class ScorePromptInputSchema(BaseModel):
     prompt: str = Field(
         description="Required. The prompt to score"
+    )
+
+
+class CheckImageInputSchema(BaseModel):
+    image_path: str = Field(
+        description="Required. Path to the generated image to check"
+    )
+    prompt: str = Field(
+        description="Required. The original prompt used for generation"
+    )
+    categories: Optional[List[str]] = Field(
+        default=None,
+        description="Optional. Categories to check: material, structure, color, visual"
     )
 
 
@@ -113,4 +128,38 @@ async def score_airmold_prompt(
     return result
 
 
-__all__ = ["enhance_airmold_prompt", "refine_airmold_prompt", "score_airmold_prompt"]
+@tool("check_airmold_image",
+      description="检查气模图像质量。使用 VQA 检查生成的图像是否符合 prompt 描述，返回错误反馈列表。",
+      args_schema=CheckImageInputSchema)
+async def check_airmold_image(
+    image_path: str,
+    prompt: str,
+    config: RunnableConfig,
+    categories: Optional[List[str]] = None,
+) -> str:
+    ctx = config.get('configurable', {})
+    api_key = ctx.get('api_key', None)
+
+    checker = get_vqa_checker(api_key)
+    errors = checker.check_image(image_path, prompt, categories)
+    feedback = checker.get_error_feedback(errors)
+
+    if not feedback:
+        return "图像检查通过：未发现明显错误。"
+
+    result = "【图像检查结果】\n\n"
+    result += "发现以下问题：\n"
+    for i, fb in enumerate(feedback, 1):
+        result += f"{i}. {fb}\n"
+
+    result += "\n可以使用 refine_airmold_prompt 工具结合这些错误反馈来优化 prompt。"
+
+    return result
+
+
+__all__ = [
+    "enhance_airmold_prompt",
+    "refine_airmold_prompt",
+    "score_airmold_prompt",
+    "check_airmold_image",
+]
