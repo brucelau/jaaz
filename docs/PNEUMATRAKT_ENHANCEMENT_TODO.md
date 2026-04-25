@@ -34,13 +34,20 @@
 - [x] 测试 check_airmold_image VQA 流程
 - [x] 修复 refinement.py 规则修正 bug
 
-## 待完成
+## 暂不实现（可选）
 
-### Phase 5: 高级功能（可选）
+### Phase 5: 高级功能（可选，暂不实现）
 - [ ] 聚类选择机制（GenPilot 的 K-Means 聚类）
+  - 参考: GenPilot/utils_all/cluster.py
+  - 用途: 多候选 prompts 的聚类选择
 - [ ] 多候选生成 + 贝叶斯更新
+  - 参考: GenPilot/utils_all/refiner.py, scorer.py
+  - 用途: 迭代优化最优 prompt
 - [ ] 历史记忆系统
+  - 参考: GenericAgent/memory/
+  - 用途: 累积成功的设计经验
 - [ ] 用户反馈学习
+  - 用途: 根据用户选择学习偏好
 
 ## 错误类型定义
 
