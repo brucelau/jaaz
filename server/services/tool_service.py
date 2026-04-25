@@ -15,6 +15,7 @@ from tools.generate_image_by_ideogram3_bal_jaaz import (
 )
 from tools.generate_image_by_ideogram import generate_image_by_ideogram
 from tools.generate_image_by_nano_banana import generate_image_by_nano_banana
+from tools.enhance_airmold_prompt import enhance_airmold_prompt
 
 # from tools.generate_image_by_flux_1_1_pro import generate_image_by_flux_1_1_pro
 from tools.generate_image_by_flux_kontext_pro_jaaz import (
@@ -220,6 +221,10 @@ class ToolService:
             self.tools["write_plan"] = {
                 "provider": "system",
                 "tool_function": write_plan_tool,
+            }
+            self.tools["enhance_airmold_prompt"] = {
+                "provider": "system",
+                "tool_function": enhance_airmold_prompt,
             }
         except ImportError as e:
             print(f"❌ 注册必须工具失败 write_plan: {e}")

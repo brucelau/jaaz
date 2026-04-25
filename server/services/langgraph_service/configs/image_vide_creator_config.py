@@ -10,7 +10,7 @@ You can write very professional image prompts to generate aesthetically pleasing
 1. If it is a image generation task, write a Design Strategy Doc first in the SAME LANGUAGE AS THE USER'S PROMPT.
 
 Example Design Strategy Doc:
-Design Proposal for “MUSE MODULAR – Future of Identity” Cover
+Design Proposal for "MUSE MODULAR – Future of Identity" Cover
 • Recommended resolution: 1024 × 1536 px (portrait) – optimal for a standard magazine trim while preserving detail for holographic accents.
 
 • Style & Mood
@@ -20,15 +20,15 @@ Design Proposal for “MUSE MODULAR – Future of Identity” Cover
 
 • Key Visual Element
 – Central androgynous model, shoulders-up, lit with soft frontal key and twin rim lights.
-– A translucent polygonal AR mask overlays the face; within it, three offset “ghost” facial layers (different eyes, nose, mouth) hint at multiple personas.
+– A translucent polygonal AR mask overlays the face; within it, three offset "ghost" facial layers (different eyes, nose, mouth) hint at multiple personas.
 – Subtle pixel sorting/glitch streaks emanate from mask edges, blending into background grid.
 
 • Composition & Layout
 
-Masthead “MUSE MODULAR” across the top, extra-condensed modular sans serif; characters constructed from repeating geometric units. Spot UV + holo foil.
-Tagline “Who are you today?” centered beneath masthead in ultra-light italic.
-Subject’s gaze directly engages reader; head breaks the baseline of the masthead for depth.
-Bottom left kicker “Future of Identity Issue” in tiny monospaced capitals.
+Masthead "MUSE MODULAR" across the top, extra-condensed modular sans serif; characters constructed from repeating geometric units. Spot UV + holo foil.
+Tagline "Who are you today?" centered beneath masthead in ultra-light italic.
+Subject's gaze directly engages reader; head breaks the baseline of the masthead for depth.
+Bottom left kicker "Future of Identity Issue" in tiny monospaced capitals.
 Discreet modular grid lines and data glyphs fade into matte charcoal background, preserving negative space.
 • Color Palette
 #000000, #1a1a1a, #4d4d4d, #d9d9d9 + holographic gradient (#00eaff, #c400ff, #38ffab).
@@ -43,9 +43,7 @@ Discreet modular grid lines and data glyphs fade into matte charcoal background,
 3. If it is a video generation task, use video generation tools to generate the video. You can choose to generate the necessary images first, and then use the images to generate the video, or directly generate the video using text prompt.
 """
 
-class ImageVideoCreatorAgentConfig(BaseAgentConfig):
-    def __init__(self, tool_list: List[ToolInfoJson]) -> None:
-        image_input_detection_prompt = """
+image_input_detection_prompt = """
 
 IMAGE INPUT DETECTION:
 When the user's message contains input images in XML format like:
@@ -58,7 +56,7 @@ You MUST:
 5. For video generation → use video tools with input_images if images are present
 """
 
-        batch_generation_prompt = """
+batch_generation_prompt = """
 
 BATCH GENERATION RULES:
 - If user needs >10 images: Generate in batches of max 10 images each
@@ -67,7 +65,7 @@ BATCH GENERATION RULES:
 
 """
 
-        error_handling_prompt = """
+error_handling_prompt = """
 
 ERROR HANDLING INSTRUCTIONS:
 When image generation fails, you MUST:
@@ -86,12 +84,44 @@ When image generation fails, you MUST:
 IMPORTANT: Never ignore tool errors. Always respond to failed tool calls with helpful guidance for the user.
 """
 
-        full_system_prompt = system_prompt + \
-            image_input_detection_prompt + \
-            batch_generation_prompt + \
-            error_handling_prompt
+airmold_design_prompt = """
 
-        # 图像设计智能体不需要切换到其他智能体
+AIRMOLD DESIGN ENHANCEMENT:
+For air-mold/inflatable product design requests, use the enhance_airmold_prompt tool to generate professional prompts.
+When the user describes an air-mold design (气模), including but not limited to:
+- 气模拱门 (air-mold arch/archway)
+- 气模人偶 (air-mold mascot/character)
+- 气模卡通 (inflatable cartoon)
+- 气模玩具 (inflatable toy)
+- 大气模 (large air-mold)
+- Any inflatable product design
+
+Steps:
+1. Call enhance_airmold_prompt with the user's description
+2. Use the enhanced prompt from the result for image generation
+3. This ensures professional quality with proper material, structure, color, and composition details
+
+Example:
+User: "生成一个卡通风格的红色大气模"
+↓
+enhance_airmold_prompt("卡通风格的红色大气模")
+↓
+Enhanced result includes: material (PVC), structure, color palette, lighting, composition
+↓
+generate_image_by_ideogram(enhanced_prompt)
+"""
+
+full_system_prompt = (
+    system_prompt +
+    image_input_detection_prompt +
+    batch_generation_prompt +
+    error_handling_prompt +
+    airmold_design_prompt
+)
+
+
+class ImageVideoCreatorAgentConfig(BaseAgentConfig):
+    def __init__(self, tool_list: List[ToolInfoJson]) -> None:
         handoffs: List[HandoffConfig] = []
 
         super().__init__(
