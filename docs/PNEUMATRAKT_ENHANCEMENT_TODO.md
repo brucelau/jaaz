@@ -21,24 +21,20 @@
 - [x] `refine_airmold_prompt` 工具 - 基于错误反馈修正 prompt
 - [x] `score_airmold_prompt` 工具 - 四维度评分
 
+### Phase 3: VQA 错误检查集成 ✅
+- [x] `server/tools/patterns/vqa_checker.py` - VQA 图像检查器
+- [x] `check_airmold_image` 工具 - VQA 图像质量检查
+- [x] 集成 VQA 到工具流程
+- [x] 更新 ImageVideoCreator prompt 添加 VQA 检查指引
+
+### Phase 4: 端到端测试 ✅
+- [x] 测试 enhance_airmold_prompt 工具链
+- [x] 测试 refine_airmold_prompt 迭代修正
+- [x] 测试 score_airmold_prompt 评分
+- [x] 测试 check_airmold_image VQA 流程
+- [x] 修复 refinement.py 规则修正 bug
+
 ## 待完成
-
-### Phase 3: VQA 错误检查集成
-- [ ] `server/tools/patterns/vqa_checker.py` - VQA 图像检查器
-  - 基于 LLM + 图像做 QA 检查
-  - 检查材质、结构、颜色等是否与 prompt 一致
-- [ ] `server/tools/patterns/feedback_collector.py` - 错误反馈收集器
-  - 从 VQA 结果提取错误类型
-  - 生成 error_feedback 列表
-- [ ] 集成 VQA 到 enhance_airmold_prompt 流程
-- [ ] 更新 ImageVideoCreator prompt 添加 VQA 检查指引
-
-### Phase 4: 端到端测试
-- [ ] 测试 enhance_airmold_prompt 工具链
-- [ ] 测试 refine_airmold_prompt 迭代修正
-- [ ] 测试 score_airmold_prompt 评分
-- [ ] 测试 VQA 错误检查流程
-- [ ] 性能优化（缓存、并行的候选生成）
 
 ### Phase 5: 高级功能（可选）
 - [ ] 聚类选择机制（GenPilot 的 K-Means 聚类）
@@ -104,9 +100,30 @@ Pass 标准: overall >= 3.5
 ## 技术债务
 
 - [ ] scorer.py 的 rule-based 评分过于简单，需要更复杂的权重计算
-- [ ] refinement.py 的规则修正尚未真正实现 _apply_refinement 逻辑
+- [x] refinement.py 的规则修正已实现（Phase 4 修复）
 - [ ] 没有错误边界处理
 - [ ] 没有超时处理
+
+## 工具清单
+
+| 工具 | 描述 |
+|------|------|
+| `enhance_airmold_prompt` | 增强气模设计 prompt |
+| `refine_airmold_prompt` | 基于错误反馈修正 prompt |
+| `score_airmold_prompt` | 评估 prompt 质量 |
+| `check_airmold_image` | VQA 图像质量检查 |
+
+## 工作流
+
+```
+用户输入 -> PatternMatcher.match() -> 匹配设计规范
+    -> PromptEnhancer.enhance() -> 增强 prompt
+    -> score_airmold_prompt() -> 评分检查
+    -> generate_image() -> 生成图像
+    -> check_airmold_image() -> VQA 检查
+    -> refine_airmold_prompt() -> 错误修正（如有）
+    -> 重新生成（如需要）
+```
 
 ## 参考资料
 

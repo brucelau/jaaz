@@ -109,7 +109,62 @@ class RefinementEngine:
         refinement: str,
         example: str
     ) -> str:
-        return prompt
+        error_lower = error.lower()
+        enhanced = prompt
+
+        if "材质" in error_lower:
+            if "pvc" not in enhanced.lower():
+                if "光滑" not in enhanced.lower():
+                    if "。" in enhanced:
+                        enhanced = enhanced.replace("。", "，PVC材质表面光滑防水。")
+                    else:
+                        enhanced += "，PVC材质表面光滑防水"
+                else:
+                    enhanced = enhanced.replace("光滑", "PVC材质光滑")
+            elif "质感" not in enhanced.lower():
+                enhanced += "，质感细腻"
+
+        elif "结构" in error_lower or "充气" in error_lower:
+            if "充气" not in enhanced.lower():
+                if "立体" in enhanced:
+                    enhanced = enhanced.replace("立体", "立体充气结构")
+                else:
+                    if "。" in enhanced:
+                        enhanced = enhanced.replace("。", "，充气立体结构设计。")
+                    else:
+                        enhanced += "，充气立体结构设计"
+            elif "接缝" not in enhanced.lower():
+                enhanced += "，精细接缝处理"
+
+        elif "颜色" in error_lower or "色" in error_lower:
+            if "pantone" not in enhanced.lower() and "色号" not in enhanced.lower():
+                enhanced += "，Pantone色号精准配色"
+
+        elif "构图" in error_lower:
+            if "构图" not in enhanced.lower():
+                enhanced += "，专业构图"
+
+        elif "光影" in error_lower or ("光" in error_lower and "光" not in enhanced.lower()):
+            if "光" not in enhanced.lower():
+                enhanced += "，45度侧光照明"
+
+        elif "纹理" in error_lower:
+            if "纹理" not in enhanced.lower():
+                enhanced += "，细腻纹理"
+
+        elif "比例" in error_lower or "大小" in error_lower:
+            if "比例" not in enhanced.lower():
+                enhanced += "，比例协调"
+
+        elif "背景" in error_lower:
+            if "背景" not in enhanced.lower():
+                enhanced += "，简洁背景"
+
+        elif "细节" in error_lower:
+            if "细节" not in enhanced.lower():
+                enhanced += "，细节精致"
+
+        return enhanced
 
     def _refine_with_llm(
         self,
