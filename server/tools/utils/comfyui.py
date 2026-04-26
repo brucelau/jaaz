@@ -13,7 +13,7 @@ from services.config_service import (
     IMAGE_FORMATS,
     VIDEO_FORMATS,
 )
-from routers.comfyui_execution import execute
+from services.comfyui_execution_service import execute
 from tools.video_generation.video_canvas_utils import get_video_info_and_save
 from services.log_service import tool_logger as logger
 

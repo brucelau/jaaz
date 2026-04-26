@@ -23,24 +23,24 @@ const CommonDialogContent: React.FC<CommonDialogProps> = ({
     z: 0,
     transition: {
       duration: 0.5,
-      ease: [0.17, 0.67, 0.51, 1],
+      ease: [0.17, 0.67, 0.51, 1] as any,
       opacity: {
         delay: 0.2,
         duration: 0.4,
-        ease: 'easeOut',
+        ease: 'easeOut' as any,
       },
     },
   }
 
-  const initialState = {
+  const initialStateVal = {
     opacity: 0,
-    filter: 'blur(12px)',
-    z: -100,
-    rotateY: 5,
-    rotateX: 25,
+    filter: 'blur(10px)',
+    z: -300,
+    rotateY: -20,
+    rotateX: -20,
     transition: {
-      duration: 0.3,
-      ease: [0.67, 0.17, 0.62, 0.64],
+      duration: 0.5,
+      ease: [0.17, 0.67, 0.51, 1] as any,
     },
   }
 
@@ -63,9 +63,9 @@ const CommonDialogContent: React.FC<CommonDialogProps> = ({
                   'grid rounded-lg p-4 min-w-[300px] w-full max-w-lg gap-4 border bg-background shadow-lg sm:rounded-lg',
                   className
                 )}
-                initial={initialState}
+                initial={initialStateVal}
                 animate={openState}
-                exit={initialState}
+                exit={initialStateVal}
                 style={{ transformPerspective }}
               >
                 {children}

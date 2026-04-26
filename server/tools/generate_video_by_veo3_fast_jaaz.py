@@ -5,7 +5,7 @@ from langchain_core.runnables import RunnableConfig
 from services.jaaz_service import JaazService
 from tools.video_generation.video_canvas_utils import send_video_start_notification, process_video_result
 from services.tool_confirmation_manager import tool_confirmation_manager
-from services.websocket_service import send_to_websocket
+from ws_manager.emitter import send_to_websocket
 from services.log_service import tool_logger as logger
 import json
 

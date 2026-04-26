@@ -4,7 +4,6 @@ from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
 from tools.patterns import (
     PromptEnhancer,
-    PatternMatcher,
     RefinementEngine,
     get_refinement_engine,
     AirMoldScorer,
@@ -15,8 +14,8 @@ from tools.patterns import (
 from services.log_service import tool_logger as logger
 
 
-_patterns_matcher = PatternMatcher()
-_patterns_enhancer = PromptEnhancer(matcher=_patterns_matcher)
+import os
+_patterns_enhancer = PromptEnhancer(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 class EnhancePromptInputSchema(BaseModel):
@@ -69,59 +68,23 @@ async def enhance_airmold_prompt(
     api_key = ctx.get('api_key', None)
 
     if api_key:
-        enhancer = PromptEnhancer(matcher=_patterns_matcher, api_key=api_key)
+        enhancer = PromptEnhancer(api_key=api_key)
     else:
         enhancer = _patterns_enhancer
 
-    scorer = get_scorer()
+    logger.info("enhance_flow_start",
+        user_input=user_input,
+        has_feedback=error_feedback is not None,
+        feedback_count=len(error_feedback) if error_feedback else 0
+    )
 
-    max_retries = 3
-    best_prompt = None
-    best_score_info = None
-    all_feedback = []
+    result = enhancer.enhance(user_input)
+    best_prompt = result.enhanced_prompt
 
-    logger.info("enhance_flow_start", user_input=user_input)
-
-    for attempt in range(max_retries):
-        feedback = all_feedback[-1:] if attempt > 0 and all_feedback else None
-
-        logger.info("attempt", attempt=attempt + 1, step="generating_candidate")
-        result = enhancer.enhance(user_input, feedback=feedback)
-        candidate = result.enhanced_prompt
-        logger.debug("attempt", attempt=attempt + 1, step="candidate_generated", candidate=f"{candidate[:100]}...")
-
-        logger.info("attempt", attempt=attempt + 1, step="calling_selene")
-        eval_result = scorer.evaluate_with_feedback(candidate, feedback)
-        score = eval_result["score"]
-
-        logger.info("attempt",
-            attempt=attempt + 1,
-            step="selene_scored",
-            material=score['material_accuracy'],
-            structural=score['structural_soundness'],
-            visual=score['visual_quality'],
-            color=score['color_accuracy'],
-            overall=score['overall'],
-            pass_=eval_result['pass']
-        )
-
-        if eval_result["pass"]:
-            logger.info("attempt", attempt=attempt + 1, step="accepted", candidate=f"{candidate[:100]}...")
-            best_prompt = candidate
-            best_score_info = eval_result
-            break
-
-        if eval_result["suggestions"]:
-            suggestion = eval_result["suggestions"][0]
-            logger.info("attempt", attempt=attempt + 1, step="feedback", suggestion=suggestion)
-            all_feedback.append(suggestion)
-
-        best_prompt = candidate
-
-    logger.info("enhance_flow_end", selected=f"{best_prompt[:100]}..." if best_prompt else None)
-
-    if best_prompt is None:
-        best_prompt = user_input
+    logger.info("enhance_flow_end",
+        original_input=user_input,
+        final_prompt=best_prompt
+    )
 
     if error_feedback:
         refinement_engine = get_refinement_engine()

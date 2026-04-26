@@ -1,20 +1,16 @@
-from typing import Optional, TypedDict
-from langchain_core.tools import BaseTool
+from typing import Optional, Any
+from pydantic import BaseModel
 
-class ToolInfoRequired(TypedDict):
-    tool_function: BaseTool
+
+class ToolInfo(BaseModel):
+    tool_function: Any
     provider: str
+    display_name: Optional[str] = None
+    type: Optional[str] = None
 
-class ToolInfoOptional(TypedDict, total=False):
-    display_name: Optional[str]
-    type: Optional[str]
 
-class ToolInfo(ToolInfoRequired, ToolInfoOptional):
-    pass
-
-class ToolInfoJsonRequired(TypedDict):
+class ToolInfoJson(BaseModel):
     provider: str
     id: str
-
-class ToolInfoJson(ToolInfoJsonRequired, ToolInfoOptional):
-    pass
+    display_name: Optional[str] = None
+    type: Optional[str] = None

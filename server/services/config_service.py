@@ -61,11 +61,12 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
 }
 
 SERVER_DIR = os.path.dirname(os.path.dirname(__file__))
+CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(SERVER_DIR, "config"))
 USER_DATA_DIR = os.getenv(
     "USER_DATA_DIR",
     os.path.join(SERVER_DIR, "user_data"),
 )
-FILES_DIR = os.path.join(USER_DATA_DIR, "files")
+FILES_DIR = os.getenv("FILES_DIR", os.path.join(USER_DATA_DIR))
 
 
 IMAGE_FORMATS = (
@@ -92,7 +93,7 @@ class ConfigService:
     def __init__(self):
         self.app_config: AppConfig = copy.deepcopy(DEFAULT_PROVIDERS_CONFIG)
         self.config_file = os.getenv(
-            "CONFIG_PATH", os.path.join(USER_DATA_DIR, "config.toml")
+            "CONFIG_PATH", os.path.join(CONFIG_DIR, "config.toml")
         )
         self.initialized = False
 

@@ -17,7 +17,7 @@ Knowledge Service - 知识库服务模块
 """
 
 from typing import List, Dict, Any
-from .settings_service import settings_service
+from db.settings_service import settings_service
 
 
 class KnowledgeService:

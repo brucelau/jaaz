@@ -1,24 +1,4 @@
 import pytest
-import sys
-from unittest.mock import MagicMock
-
-sys.modules['langchain_core'] = MagicMock()
-sys.modules['langchain_core.tools'] = MagicMock()
-sys.modules['models'] = MagicMock()
-sys.modules['models.tool_model'] = MagicMock()
-sys.modules['tools'] = MagicMock()
-sys.modules['tools.comfy_dynamic'] = MagicMock()
-sys.modules['tools.write_plan'] = MagicMock()
-sys.modules['tools.generate_image_by_gpt_image_1_jaaz'] = MagicMock()
-sys.modules['tools.generate_image_by_imagen_4_jaaz'] = MagicMock()
-sys.modules['tools.generate_image_by_imagen_4_replicate'] = MagicMock()
-sys.modules['tools.generate_image_by_ideogram3_bal_jaaz'] = MagicMock()
-sys.modules['tools.generate_image_by_ideogram'] = MagicMock()
-sys.modules['tools.generate_image_by_nano_banana'] = MagicMock()
-sys.modules['tools.enhance_airmold_prompt'] = MagicMock()
-sys.modules['services.log_service'] = MagicMock()
-sys.modules['services.db_service'] = MagicMock()
-sys.modules['services.config_service'] = MagicMock()
 
 
 class ToolInfo(dict):

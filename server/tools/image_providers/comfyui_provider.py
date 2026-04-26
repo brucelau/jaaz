@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from .image_base_provider import ImageProviderBase
 from ..utils.image_utils import get_image_info_and_save, generate_image_id
 from services.config_service import FILES_DIR, config_service
-from routers.comfyui_execution import execute
+from services.comfyui_execution_service import execute
 from services.log_service import tool_logger as logger
 
 

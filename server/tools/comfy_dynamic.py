@@ -34,10 +34,10 @@ from .utils.image_canvas_utils import (
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import InjectedToolCallId, tool, BaseTool
 from pydantic import BaseModel, Field, create_model
-from routers.comfyui_execution import upload_image
+from services.comfyui_execution_service import upload_image
 from services.config_service import FILES_DIR, config_service, IMAGE_FORMATS
-from services.db_service import db_service
-from services.websocket_service import broadcast_session_update, send_to_websocket
+from db.db_service import db_service
+from ws_manager.emitter import broadcast_session_update, send_to_websocket
 from services.log_service import tool_logger as logger
 
 from .utils.comfyui import ComfyUIWorkflowRunner

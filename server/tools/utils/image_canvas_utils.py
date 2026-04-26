@@ -10,9 +10,8 @@ import json
 from contextlib import asynccontextmanager
 from typing import Dict, List, Any, Optional, Union, cast
 from nanoid import generate
-from services.db_service import db_service
-from services.websocket_service import broadcast_session_update
-from services.websocket_service import send_to_websocket
+from db.db_service import db_service
+from ws_manager.emitter import broadcast_session_update, send_to_websocket
 from utils.canvas import find_next_best_element_position
 
 def generate_file_id() -> str:

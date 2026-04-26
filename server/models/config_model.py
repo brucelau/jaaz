@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Literal, TypedDict
+from typing import Literal
 
 class LLMConfig(BaseModel):
     model: str
@@ -11,8 +11,8 @@ class LLMConfig(BaseModel):
 class ConfigUpdate(BaseModel):
     llm: LLMConfig
 
-class ModelInfo(TypedDict):
+class ModelInfo(BaseModel):
     provider: str
-    model: str # For tool type, it is the function name
+    model: str
     url: str
     type: Literal['text', 'image', 'tool', 'video']

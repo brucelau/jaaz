@@ -1,9 +1,9 @@
 import asyncio
 import json
 from typing import Dict, Any, List
-from services.db_service import db_service
-from services.OpenAIAgents_service import create_jaaz_response
-from services.websocket_service import send_to_websocket
+from db.db_service import db_service
+from services.openai_agents_service import create_jaaz_response
+from ws_manager.emitter import send_to_websocket
 from services.stream_service import add_stream_task, remove_stream_task
 from services.log_service import chat_logger as logger
 

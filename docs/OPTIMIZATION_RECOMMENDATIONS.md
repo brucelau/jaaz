@@ -335,3 +335,69 @@ P3 (可选):
 - 结构化日志
 - 类型提示补全
 - i18n 化
+
+---
+
+## 🟣 附加建议：后端代码组织与架构重构方案
+
+目前的后端（FastAPI + Python）结构存在职责混淆、命名冗长、结构扁平化的问题。建议按照功能模块进行重构。
+
+### 1. 目录结构重构 (Directory Restructuring)
+
+#### 1.1 整理泛滥的 `tools/` 目录
+当前 `tools` 目录下有 30 多个类似 `generate_image_by_xxx_jaaz.py` 的文件，非常臃肿。
+**建议**：按生成媒介分类，并简化文件名。
+```text
+server/tools/
+├── image/
+│   ├── comfyui.py        # 替代原 generate_image_by_comfyui...
+│   ├── midjourney.py     # 替代原 generate_image_by_midjourney...
+│   ├── ideogram.py
+│   └── flux.py           # 内部通过 class/method 区分具体模型
+├── video/
+│   ├── kling.py          # 替代原 generate_video_by_kling...
+│   └── hailuo.py
+└── core/                 # 放置基础工具类
+```
+
+#### 1.2 净化 `routers/` (路由层)
+`routers` 应该**只包含 API 接口定义**。
+- 将 `comfyui_execution.py` 移动到 `services/` 或 `tasks/`。
+- 统一文件命名规范：全部使用 `*_router.py` 后缀（如 `settings.py` -> `settings_router.py`）。
+- 将测试路由如 `ssl_test.py` 移入 `tests/` 或专用开发路由。
+
+#### 1.3 抽离 WebSocket 模块
+**建议**：为长连接新建独立目录 `server/websockets/`。
+```text
+server/websockets/
+├── __init__.py
+├── manager.py     # 替代 websocket_state.py，管理连接池和 sio 实例
+├── handlers.py    # 替代 websocket_router.py，处理 connect/disconnect 事件
+└── emitter.py     # 替代 websocket_service.py，处理主动推送逻辑
+```
+
+### 2. 核心文件优化 (`main.py` 瘦身)
+
+当前的 `main.py` 混合了配置加载、静态代理、WebSocket 挂载和环境变量逻辑。
+**建议**：将 `main.py` 作为纯粹的入口文件。
+1. **抽离 Lifespan**：新建 `server/core/lifespan.py` 处理应用启动/关闭逻辑。
+2. **抽离静态文件**：新建 `server/core/static.py` 处理 React 产物加载。
+3. **批量注册**：封装 `register_routers(app)`，避免在 main 中写长串的 include_router。
+
+### 3. 架构设计升级 (Architecture Best Practices)
+
+#### 3.1 废弃全局 Singleton，改用 Dependency Injection
+当前大量使用全局实例（如 `from services.db_service import db_service`），不利于单元测试和解耦。
+**建议**：使用 FastAPI 的 `Depends()` 依赖注入系统：
+```python
+@router.get("/list")
+async def list_canvases(db: DatabaseService = Depends(get_db)):
+    return await db.list_canvases()
+```
+
+#### 3.2 命名规范统一
+- **目录命名**：修改 `OpenAIAgents_service` 为纯 `snake_case`（如 `openai_agents`）。
+- **文件命名**：将 `StreamProcessor.py` 改为小写 `stream_processor.py`，保持全项目统一。
+
+#### 3.3 Pydantic 模型标准化
+确保 `models/` 目录下的数据结构全部使用 Pydantic v2 `BaseModel`，以获得严格校验和完善的 OpenAPI Swagger 文档，弃用松散的 TypedDict 或手写类。

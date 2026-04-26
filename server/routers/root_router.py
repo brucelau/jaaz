@@ -5,7 +5,7 @@ import httpx
 from models.tool_model import ToolInfoJson
 from services.tool_service import tool_service
 from services.config_service import config_service
-from services.db_service import db_service
+from db.db_service import db_service
 from utils.http_client import HttpClient
 from models.config_model import ModelInfo
 from typing import List

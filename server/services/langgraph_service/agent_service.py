@@ -1,6 +1,6 @@
 from models.tool_model import ToolInfoJson
-from services.db_service import db_service
-from .StreamProcessor import StreamProcessor
+from db.db_service import db_service
+from .stream_processor import StreamProcessor
 from .agent_manager import AgentManager
 import traceback
 from utils.http_client import HttpClient
@@ -8,7 +8,7 @@ from langgraph_swarm import create_swarm
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
-from services.websocket_service import send_to_websocket
+from ws_manager.emitter import send_to_websocket
 from services.config_service import config_service
 from typing import Optional, List, Dict, Any, cast, Set, TypedDict
 from models.config_model import ModelInfo

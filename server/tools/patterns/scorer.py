@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
+from pathlib import Path
 import re
 import os
+import json
 from services.log_service import tool_logger as logger
 
 
@@ -24,86 +26,26 @@ class AirMoldScore:
 
 
 class AirMoldScorer:
-    MATERIAL_KEYWORDS = [
-        "PVC", "TPU", "Dacron", "涤纶", "尼龙", "网布",
-        "光滑", "防水", "耐磨", "加厚", "高弹性", "柔滑",
-        "面料", "材质", "质感", "表面"
-    ]
-
-    STRUCTURE_KEYWORDS = [
-        "充气", "接缝", "底座", "风机", "固定", "支撑",
-        "立体", "比例", "对称", "稳固", "加固", "多点",
-        "结构", "设计", "造型"
-    ]
-
-    VISUAL_KEYWORDS = [
-        "构图", "光影", "照明", "阴影", "视角", "景深",
-        "背景", "分辨率", "8K", "4K", "专业", "摄影"
-    ]
-
-    COLOR_KEYWORDS = [
-        "红色", "蓝色", "绿色", "黄色", "紫色", "橙色",
-        "粉色", "白色", "黑色", "灰色", "金色", "银色",
-        "配色", "色系", "Pantone", "色彩", "颜色", "色调"
-    ]
-
     PASS_THRESHOLD = float(os.getenv("PASS_THRESHOLD", "3.5"))
     SELENE_URL = os.getenv("SELENE_URL", "http://100.75.202.111:8080/v1/chat/completions")
-    SELENE_TIMEOUT = int(os.getenv("SELENE_TIMEOUT", "60"))
+    SELENE_TIMEOUT = int(os.getenv("SELENE_TIMEOUT", "180"))
+
+    DEFAULT_TEMPLATE_PATH = Path(__file__).parent.parent.parent / "config" / "prompts" / "scorer_template.md"
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key
+        self._template = self._load_template()
 
-    def score_prompt(self, prompt: str) -> AirMoldScore:
-        material_score = self._score_dimension(prompt, self.MATERIAL_KEYWORDS)
-        structure_score = self._score_dimension(prompt, self.STRUCTURE_KEYWORDS)
-        visual_score = self._score_dimension(prompt, self.VISUAL_KEYWORDS)
-        color_score = self._score_dimension(prompt, self.COLOR_KEYWORDS)
+    def _load_template(self) -> str:
+        try:
+            if self.DEFAULT_TEMPLATE_PATH.exists():
+                return self.DEFAULT_TEMPLATE_PATH.read_text(encoding="utf-8")
+        except Exception:
+            pass
+        return ""
 
-        overall = (material_score + structure_score + visual_score + color_score) / 4
-
-        return AirMoldScore(
-            material_accuracy=material_score,
-            structural_soundness=structure_score,
-            visual_quality=visual_score,
-            color_accuracy=color_score,
-            overall=overall
-        )
-
-    def score_batch(self, prompts: List[str]) -> List[AirMoldScore]:
-        return [self.score_prompt(p) for p in prompts]
-
-    def evaluate_batch(self, prompts: List[str]) -> List[Dict]:
-        return [self.evaluate_and_suggest(p) for p in prompts]
-
-    def _score_dimension(self, prompt: str, keywords: List[str]) -> float:
-        prompt_lower = prompt.lower()
-        matched = sum(1 for kw in keywords if kw.lower() in prompt_lower)
-        base_score = min(matched / 3.0 * 5, 5.0)
-        return round(base_score, 2)
-
-    def evaluate_and_suggest(
-        self,
-        prompt: str,
-        api_key: Optional[str] = None
-    ) -> Dict:
-        score = self.score_prompt(prompt)
-        suggestions = []
-
-        if score.material_accuracy < 3:
-            suggestions.append("材质不够明确，缺少 PVC/TPU/防水面料 等专业材质描述")
-        if score.structural_soundness < 3:
-            suggestions.append("结构描述不足，需强化 充气设计/接缝加固/底座支撑 等要点")
-        if score.visual_quality < 3:
-            suggestions.append("视觉效果待提升，缺乏 专业摄影/8K分辨率/光影 等描述")
-        if score.color_accuracy < 3:
-            suggestions.append("色彩描述模糊，需指定 具体色系 或 Pantone 色号")
-
-        return {
-            "score": score.to_dict(),
-            "suggestions": suggestions,
-            "pass": score.overall >= self.PASS_THRESHOLD
-        }
+    def get_template(self) -> str:
+        return self._template
 
     def evaluate_with_feedback(
         self,
@@ -115,29 +57,10 @@ class AirMoldScorer:
             feedback_note = "\n".join(f"- {f}" for f in feedback)
             feedback_note = f"\n参考之前的问题：\n{feedback_note}\n"
 
-        eval_prompt = f"""你是一个气模设计 prompt 评分专家。请评估以下气模设计 prompt 的质量。
-
-【待评估 Prompt】
-{prompt}
-{feedback_note}
-【评分维度】（每项 1-5 分，5 分最优）
-1. 材质准确性 (material_accuracy)：是否明确描述了材质（PVC、TPU、防水面料等）
-2. 结构合理性 (structural_soundness)：是否清晰描述了充气结构、接缝、底座等
-3. 视觉质量 (visual_quality)：是否有专业的视觉描述（构图、光影、8K等）
-4. 颜色准确性 (color_accuracy)：是否指定了具体颜色或色系
-
-请按以下 JSON 格式返回评分和反馈：
-{{
-  "material_accuracy": X,
-  "structural_soundness": X,
-  "visual_quality": X,
-  "color_accuracy": X,
-  "overall": X,
-  "pass": true/false,
-  "feedback": "具体改进建议（如果 pass=false，说明不足之处和如何改进）"
-}}
-
-返回 JSON："""
+        eval_prompt = self._template.format(
+            prompt=prompt,
+            feedback_note=feedback_note
+        )
 
         try:
             import requests
@@ -146,7 +69,7 @@ class AirMoldScorer:
                 self.SELENE_URL,
                 json={
                     "messages": [{"role": "user", "content": eval_prompt}],
-                    "max_tokens": 300,
+                    "max_tokens": 500,
                     "temperature": 0.3
                 },
                 timeout=self.SELENE_TIMEOUT
@@ -155,28 +78,73 @@ class AirMoldScorer:
                 result_text = resp.json()["choices"][0]["message"]["content"]
                 logger.info("selene_response", response=f"{result_text[:200]}...")
                 return self._parse_selene_response(result_text, prompt)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("selene_error", error=str(e))
 
-        return self.evaluate_and_suggest(prompt)
+        return {
+            "score": {
+                "material_accuracy": 0,
+                "inflatable_structure": 0,
+                "festival_theme": 0,
+                "style": 0,
+                "main_shape": 0,
+                "product_elements": 0,
+                "usage_scene": 0,
+                "time_setting": 0,
+                "lighting_effect": 0,
+                "atmosphere": 0,
+                "background": 0,
+                "composition": 0,
+                "visual_quality": 0,
+                "color_accuracy": 0,
+                "overall": 0
+            },
+            "suggestions": ["评分服务暂时不可用"],
+            "pass": False
+        }
 
     def _parse_selene_response(self, response_text: str, prompt: str) -> Dict:
         try:
             json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if json_match:
-                data = eval(json_match.group())
+                data = json.loads(json_match.group())
                 material = float(data.get("material_accuracy", 0))
-                structure = float(data.get("structural_soundness", 0))
+                inflatable = float(data.get("inflatable_structure", 0))
+                festival = float(data.get("festival_theme", 0))
+                style = float(data.get("style", 0))
+                main_shape = float(data.get("main_shape", 0))
+                product_elements = float(data.get("product_elements", 0))
+                usage_scene = float(data.get("usage_scene", 0))
+                time_setting = float(data.get("time_setting", 0))
+                lighting = float(data.get("lighting_effect", 0))
+                atmosphere = float(data.get("atmosphere", 0))
+                background = float(data.get("background", 0))
+                composition = float(data.get("composition", 0))
                 visual = float(data.get("visual_quality", 0))
                 color = float(data.get("color_accuracy", 0))
-                overall = float(data.get("overall", 0))
+
+                scores = [material, inflatable, festival, style, main_shape,
+                         product_elements, usage_scene, time_setting, lighting,
+                         atmosphere, background, composition, visual, color]
+                overall = sum(scores) / len(scores) if scores else 0
+
                 feedback = data.get("feedback", "")
                 passed = data.get("pass", overall >= self.PASS_THRESHOLD)
 
                 return {
                     "score": {
                         "material_accuracy": round(material, 2),
-                        "structural_soundness": round(structure, 2),
+                        "inflatable_structure": round(inflatable, 2),
+                        "festival_theme": round(festival, 2),
+                        "style": round(style, 2),
+                        "main_shape": round(main_shape, 2),
+                        "product_elements": round(product_elements, 2),
+                        "usage_scene": round(usage_scene, 2),
+                        "time_setting": round(time_setting, 2),
+                        "lighting_effect": round(lighting, 2),
+                        "atmosphere": round(atmosphere, 2),
+                        "background": round(background, 2),
+                        "composition": round(composition, 2),
                         "visual_quality": round(visual, 2),
                         "color_accuracy": round(color, 2),
                         "overall": round(overall, 2)
@@ -184,10 +152,30 @@ class AirMoldScorer:
                     "suggestions": [feedback] if feedback else [],
                     "pass": passed
                 }
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("parse_error", error=str(e))
 
-        return self.evaluate_and_suggest(prompt)
+        return {
+            "score": {
+                "material_accuracy": 0,
+                "inflatable_structure": 0,
+                "festival_theme": 0,
+                "style": 0,
+                "main_shape": 0,
+                "product_elements": 0,
+                "usage_scene": 0,
+                "time_setting": 0,
+                "lighting_effect": 0,
+                "atmosphere": 0,
+                "background": 0,
+                "composition": 0,
+                "visual_quality": 0,
+                "color_accuracy": 0,
+                "overall": 0
+            },
+            "suggestions": ["评分解析失败"],
+            "pass": False
+        }
 
 
 _scorer: Optional[AirMoldScorer] = None

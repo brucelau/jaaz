@@ -57,7 +57,7 @@ from tools.generate_video_by_hailuo_02_jaaz import generate_video_by_hailuo_02_j
 from tools.generate_video_by_veo3_fast_jaaz import generate_video_by_veo3_fast_jaaz
 from tools.generate_image_by_midjourney_jaaz import generate_image_by_midjourney_jaaz
 from services.config_service import config_service
-from services.db_service import db_service
+from db.db_service import db_service
 
 TOOL_MAPPING: Dict[str, ToolInfo] = {
     # jaaz tools disabled - no longer using jaaz cloud API

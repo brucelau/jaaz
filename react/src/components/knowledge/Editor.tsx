@@ -29,6 +29,7 @@ import { Textarea } from '../ui/textarea'
 import { Switch } from '../ui/switch'
 import { ImagePlusIcon, SaveIcon } from 'lucide-react'
 import { Button } from '../ui/button'
+// @ts-ignore
 import MarkdownIt from 'markdown-it'
 import MdEditor from 'react-markdown-editor-lite'
 import 'react-markdown-editor-lite/lib/index.css'
@@ -96,7 +97,7 @@ export default function Editor({ knowledgeID }: { knowledgeID: string }) {
           mdxEditorRef.current?.setMarkdown(content)
           setIsLoading(false)
         } else {
-          toast.error('Failed to read file ' + curPath)
+          toast.error('Failed to read file')
         }
       })
   }, [])
