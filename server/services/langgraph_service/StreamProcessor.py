@@ -1,4 +1,5 @@
 # type: ignore[import]
+import os
 import traceback
 from typing import Optional, List, Dict, Any, Callable, Awaitable
 from langchain_core.messages import AIMessageChunk, ToolCall, convert_to_openai_messages, ToolMessage
@@ -9,6 +10,10 @@ from services.log_service import agent_logger as logger
 
 class StreamProcessor:
     """流式处理器 - 负责处理智能体的流式输出"""
+
+    TOOLS_REQUIRING_CONFIRMATION: set = set(
+        os.getenv("TOOLS_REQUIRING_CONFIRMATION", "generate_video_by_veo3_fast_jaaz").split(",")
+    )
 
     def __init__(self, session_id: str, db_service: Any, websocket_service: Callable[[str, Dict[str, Any]], Awaitable[None]]):
         self.session_id = session_id
@@ -30,17 +35,23 @@ class StreamProcessor:
 
         compiled_swarm = swarm.compile()
 
-        async for chunk in compiled_swarm.astream(
-            {"messages": messages},
-            config=context,
-            stream_mode=["messages", "custom", 'values']
-        ):
-            await self._handle_chunk(chunk)
-
-        # 发送完成事件
-        await self.websocket_service(self.session_id, {
-            'type': 'done'
-        })
+        try:
+            async for chunk in compiled_swarm.astream(
+                {"messages": messages},
+                config=context,
+                stream_mode=["messages", "custom", 'values']
+            ):
+                await self._handle_chunk(chunk)
+        except Exception as e:
+            logger.error("stream_process_error", error=str(e))
+            await self.websocket_service(self.session_id, {
+                'type': 'error',
+                'error': str(e)
+            })
+        finally:
+            await self.websocket_service(self.session_id, {
+                'type': 'done'
+            })
 
     async def _handle_chunk(self, chunk: Any) -> None:
         # print('👇chunk', chunk)
@@ -107,26 +118,21 @@ class StreamProcessor:
                 await self._handle_tool_call_chunks(ai_message_chunk.tool_call_chunks)
         except Exception as e:
             logger.error("stream_chunk_error", error=str(e))
-            traceback.print_exc()
 
     async def _handle_tool_calls(self, tool_calls: List[ToolCall]) -> None:
         self.tool_calls = [tc for tc in tool_calls if tc.get('name')]
         logger.debug("tool_call_event", tool_calls=tool_calls)
 
         for tc in self.tool_calls:
-            name = tc.get('name', '')
-            args = tc.get('args', {})
+            name = getattr(tc, 'name', '') or (tc.get('name', '') if isinstance(tc, dict) else '')
+            args = getattr(tc, 'args', {}) or (tc.get('args', {}) if isinstance(tc, dict) else {})
             if 'generate_image' in name and args.get('prompt'):
                 logger.info("english_prompt_generated", tool=name, prompt=args.get('prompt'))
 
-        TOOLS_REQUIRING_CONFIRMATION = {
-            'generate_video_by_veo3_fast_jaaz',
-        }
-
         for tool_call in self.tool_calls:
-            tool_name = tool_call.get('name')
+            tool_name = getattr(tool_call, 'name', None) or (tool_call.get('name') if isinstance(tool_call, dict) else None)
 
-            if tool_name in TOOLS_REQUIRING_CONFIRMATION:
+            if tool_name in self.TOOLS_REQUIRING_CONFIRMATION:
                 logger.debug("tool_requires_confirmation", tool=tool_name)
                 continue
             else:
@@ -138,17 +144,16 @@ class StreamProcessor:
                 })
 
     async def _handle_tool_call_chunks(self, tool_call_chunks: List[Any]) -> None:
-        """处理工具调用参数流"""
         for tool_call_chunk in tool_call_chunks:
-            if tool_call_chunk.get('id'):
-                # 标记新的流式工具调用参数开始
-                self.last_streaming_tool_call_id = tool_call_chunk.get('id')
+            chunk_id = getattr(tool_call_chunk, 'id', None) or (tool_call_chunk.get('id') if isinstance(tool_call_chunk, dict) else None)
+            if chunk_id:
+                self.last_streaming_tool_call_id = chunk_id
+            elif self.last_streaming_tool_call_id:
+                chunk_args = getattr(tool_call_chunk, 'args', None) or (tool_call_chunk.get('args') if isinstance(tool_call_chunk, dict) else None)
+                await self.websocket_service(self.session_id, {
+                    'type': 'tool_call_arguments',
+                    'id': self.last_streaming_tool_call_id,
+                    'text': chunk_args
+                })
             else:
-                if self.last_streaming_tool_call_id:
-                    await self.websocket_service(self.session_id, {
-                        'type': 'tool_call_arguments',
-                        'id': self.last_streaming_tool_call_id,
-                        'text': tool_call_chunk.get('args')
-                    })
-                else:
-                    logger.warning("no_last_streaming_tool_call_id", chunk=tool_call_chunk)
+                logger.warning("no_last_streaming_tool_call_id", chunk=str(tool_call_chunk)[:100])
