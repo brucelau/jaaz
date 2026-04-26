@@ -99,10 +99,12 @@ async def list_tools() -> list[ToolInfoJson]:
     config = config_service.get_config()
     res: list[ToolInfoJson] = []
     for tool_id, tool_info in tool_service.tools.items():
+        # Skip system tools (internal tools like write_plan, enhance_airmold_prompt)
+        # They are used by agents but not exposed to frontend
         if tool_info.get('provider') == 'system':
             continue
         provider = tool_info['provider']
-        provider_api_key = config[provider].get('api_key', '').strip()
+        provider_api_key = config.get(provider, {}).get('api_key', '').strip()
         if provider != 'comfyui' and not provider_api_key:
             continue
         res.append({

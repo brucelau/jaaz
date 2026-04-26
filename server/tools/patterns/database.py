@@ -39,11 +39,25 @@ class ColorPattern:
 
 
 @dataclass
+class FestivalPattern:
+    """节日 Pattern"""
+    colors: list[str] = field(default_factory=list)
+    palette_description: str = ""
+    elements: list[str] = field(default_factory=list)
+    structure: list[str] = field(default_factory=list)
+    material: list[str] = field(default_factory=list)
+    mood: list[str] = field(default_factory=list)
+    composition: list[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+
+
+@dataclass
 class PatternDatabase:
     """Pattern 数据库"""
     styles: Dict[str, StylePattern] = field(default_factory=dict)
     products: Dict[str, ProductPattern] = field(default_factory=dict)
     colors: Dict[str, ColorPattern] = field(default_factory=dict)
+    festivals: Dict[str, FestivalPattern] = field(default_factory=dict)
     photography: Dict[str, Any] = field(default_factory=dict)
     materials: Dict[str, Any] = field(default_factory=dict)
     lighting: Dict[str, Any] = field(default_factory=dict)
@@ -69,10 +83,16 @@ class PatternDatabase:
             for name, values in data.get("colors", {}).items()
         }
 
+        festivals = {
+            name: FestivalPattern(**values)
+            for name, values in data.get("festivals", {}).items()
+        }
+
         return cls(
             styles=styles,
             products=products,
             colors=colors,
+            festivals=festivals,
             photography=data.get("photography", {}),
             materials=data.get("materials", {}),
             lighting=data.get("lighting", {}),

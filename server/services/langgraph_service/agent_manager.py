@@ -83,14 +83,19 @@ class AgentManager:
             if handoff_tool:
                 handoff_tools.append(handoff_tool)
 
-        # 获取业务工具
         business_tools: List[BaseTool] = []
         for tool_json in config.tools:
             tool = tool_service.get_tool(tool_json['id'])
             if tool:
                 business_tools.append(tool)
 
-        # 创建并返回 LangGraph 智能体
+        # Add system tools (like enhance_airmold_prompt) that agent needs
+        for tool_id, tool_info in tool_service.get_all_tools().items():
+            if tool_info.get('provider') == 'system':
+                tool = tool_service.get_tool(tool_id)
+                if tool:
+                    business_tools.append(tool)
+
         return create_react_agent(
             name=config.name,
             model=model,

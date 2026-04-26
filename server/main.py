@@ -86,6 +86,16 @@ async def serve_react_app():
     response.headers["Expires"] = "0"
     return response
 
+@app.get("/{filename}.png")
+async def serve_png_files(filename: str):
+    import os
+    png_path = os.path.join(react_build_dir, f"{filename}.png")
+    if os.path.exists(png_path):
+        response = FileResponse(png_path)
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return response
+    return Response(status_code=404)
+
 print('Creating socketio app')
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path='/socket.io')
 

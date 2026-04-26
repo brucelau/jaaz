@@ -724,7 +724,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 transition={{ duration: 0.5 }}
                 className='text-muted-foreground text-3xl'
               >
-                <ShinyText text='Hello, Jaaz!' />
+                <ShinyText text='Hello, James!' />
               </motion.span>
               <motion.span
                 initial={{ opacity: 0, y: 10 }}

@@ -7,6 +7,7 @@ from utils.http_client import HttpClient
 from langgraph_swarm import create_swarm  # type: ignore
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
+from langchain_google_genai import ChatGoogleGenerativeAI
 from services.websocket_service import send_to_websocket  # type: ignore
 from services.config_service import config_service
 from typing import Optional, List, Dict, Any, cast, Set, TypedDict
@@ -143,6 +144,8 @@ def _create_text_model(text_model: ModelInfo) -> Any:
     api_key = config_service.app_config.get(  # type: ignore
         provider, {}).get("api_key", "")
 
+    print(f"🔍 _create_text_model: provider={provider}, model={model}, url={url}")
+
     # TODO: Verify if max token is working
     # max_tokens = text_model.get('max_tokens', 8148)
 
@@ -150,6 +153,11 @@ def _create_text_model(text_model: ModelInfo) -> Any:
         return ChatOllama(
             model=model,
             base_url=url,
+        )
+    elif provider == 'gemini':
+        return ChatGoogleGenerativeAI(
+            model=model,
+            google_api_key=api_key,
         )
     else:
         # Create httpx client with SSL configuration for ChatOpenAI

@@ -113,6 +113,15 @@ class StreamProcessor:
         self.tool_calls = [tc for tc in tool_calls if tc.get('name')]
         print('😘tool_call event', tool_calls)
 
+        for tc in self.tool_calls:
+            name = tc.get('name', '')
+            args = tc.get('args', {})
+            if 'generate_image' in name and args.get('prompt'):
+                print(f"\n[English Prompt] [{name}]")
+                print(f"{'='*60}")
+                print(args.get('prompt'))
+                print(f"{'='*60}\n")
+
         # 需要确认的工具列表
         TOOLS_REQUIRING_CONFIRMATION = {
             # 'generate_video_by_kling_v2_jaaz',

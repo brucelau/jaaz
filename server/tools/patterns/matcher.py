@@ -21,11 +21,48 @@ class PatternMatcher:
         words = input_lower.replace(",", " ").replace("，", " ").split()
         matched = []
 
+        matched.extend(self._match_festivals(input_lower, words))
         matched.extend(self._match_styles(input_lower, words))
         matched.extend(self._match_products(input_lower, words))
         matched.extend(self._match_colors(input_lower, words))
 
         matched.sort(key=lambda x: x.score, reverse=True)
+        return matched
+
+    def _match_festivals(self, input_lower: str, words: List[str]) -> List[MatchedPattern]:
+        matched = []
+        for name, pattern in self.db.festivals.items():
+            score = 0.0
+            matched_kw = []
+
+            for kw in pattern.keywords:
+                if kw in input_lower:
+                    score += 2.0
+                    matched_kw.append(kw)
+
+            for word in words:
+                for kw in pattern.keywords:
+                    if kw in word or word in kw:
+                        score += 1.0
+                        if kw not in matched_kw:
+                            matched_kw.append(kw)
+
+            if score > 0:
+                matched.append(MatchedPattern(
+                    category="festival",
+                    name=name,
+                    score=score,
+                    matched_keywords=matched_kw,
+                    pattern_data={
+                        "colors": pattern.colors,
+                        "palette_description": pattern.palette_description,
+                        "elements": pattern.elements,
+                        "structure": pattern.structure,
+                        "material": pattern.material,
+                        "mood": pattern.mood,
+                        "composition": pattern.composition,
+                    }
+                ))
         return matched
 
     def _match_styles(self, input_lower: str, words: List[str]) -> List[MatchedPattern]:
@@ -134,10 +171,20 @@ class PatternMatcher:
             "material": [],
             "structure": [],
             "details": [],
+            "elements": [],
+            "mood": [],
         }
 
         for m in matched:
-            if m.category == "style":
+            if m.category == "festival":
+                result["colors"].extend(m.pattern_data.get("colors", []))
+                result["elements"].extend(m.pattern_data.get("elements", []))
+                result["structure"].extend(m.pattern_data.get("structure", []))
+                result["material"].extend(m.pattern_data.get("material", []))
+                result["composition"].extend(m.pattern_data.get("composition", []))
+                result["mood"].extend(m.pattern_data.get("mood", []))
+
+            elif m.category == "style":
                 result["colors"].extend(m.pattern_data.get("colors", []))
                 result["composition"].extend(m.pattern_data.get("composition", []))
                 result["lighting"].extend(m.pattern_data.get("lighting", []))

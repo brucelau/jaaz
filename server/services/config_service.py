@@ -26,27 +26,17 @@ AppConfig = Dict[str, ProviderConfig]
 
 
 DEFAULT_PROVIDERS_CONFIG: AppConfig = {
-    'jaaz': {
-        'models': {
-            # text models
-            'gpt-4o': {'type': 'text'},
-            'gpt-4o-mini': {'type': 'text'},
-            'deepseek/deepseek-chat-v3-0324': {'type': 'text'},
-            'anthropic/claude-sonnet-4': {'type': 'text'},
-            'anthropic/claude-3.7-sonnet': {'type': 'text'},
-        },
-        'url': os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/api/v1/',
-        'api_key': '',
-        'max_tokens': 8192,
-    },
     'comfyui': {
         'models': {},
         'url': 'http://127.0.0.1:8188',
         'api_key': '',
     },
-    'ollama': {
-        'models': {},
-        'url': 'http://localhost:11434',
+    'minimax': {
+        'models': {
+            'MiniMax-M2.5-highspeed': {'type': 'text'},
+            'MiniMax-M2.7-highspeed': {'type': 'text'},
+        },
+        'url': 'https://api.minimax.io/v1/',
         'api_key': '',
         'max_tokens': 8192,
     },
@@ -56,6 +46,16 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
             'gpt-4o-mini': {'type': 'text'},
         },
         'url': 'https://api.openai.com/v1/',
+        'api_key': '',
+        'max_tokens': 8192,
+    },
+    'gemini': {
+        'models': {
+            'gemini-2.5-pro': {'type': 'text'},
+            'gemini-2.5-flash': {'type': 'text'},
+            'gemini-2.0-flash': {'type': 'text'},
+        },
+        'url': 'https://generativelanguage.googleapis.com/',
         'api_key': '',
         'max_tokens': 8192,
     },

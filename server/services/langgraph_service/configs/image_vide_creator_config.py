@@ -98,21 +98,30 @@ When the user describes an air-mold design (气模), including but not limited t
 
 Steps:
 1. Call enhance_airmold_prompt with the user's description
-2. Optionally call score_airmold_prompt to evaluate the enhanced prompt
-3. Use the enhanced prompt for image generation
+   - This tool internally generates one candidate, scores it with LLM, uses feedback to improve (up to 3 retries)
+2. Write a Design Strategy Doc in the SAME LANGUAGE as the user's input
+   - Include: resolution, style/mood, key visual elements, composition, color palette, material description
+3. Generate English image prompt based on the Design Strategy Doc
+4. Call generate_image tool with the English prompt
 
 Example:
 User: "生成一个卡通风格的红色大气模"
 ↓
 enhance_airmold_prompt("卡通风格的红色大气模")
 ↓
-Enhanced result includes: material (PVC), structure, color palette, lighting, composition
+[Internal: generate 1 → LLM score + feedback → if fail, adjust → retry → up to 3 attempts]
 ↓
-generate_image_by_ideogram(enhanced_prompt)
-
-PROMPT QUALITY CHECK:
-After enhancing a prompt, you can use score_airmold_prompt to check quality.
-If score is low (< 3.5), use enhance_airmold_prompt again with error feedback to refine.
+Enhanced Chinese prompt
+↓
+Agent writes Chinese Design Strategy Doc:
+- 分辨率: 1024x1024
+- 风格: 卡通风格，活泼可爱
+- 色彩: 红色主色调 (#FF0000)
+- 材质: PVC，防水面料
+↓
+Generate English prompt from the Design Strategy Doc
+↓
+generate_image_by_ideogram(english_prompt)
 
 ITERATIVE IMPROVEMENT:
 If image generation has issues (e.g., wrong material, poor composition):
@@ -125,13 +134,6 @@ After generating an image, you can use check_airmold_image to verify quality:
 2. Review the error feedback
 3. If errors are found, use refine_airmold_prompt to fix them
 4. Regenerate the image with the refined prompt
-
-Workflow Example:
-1. enhance_airmold_prompt("卡通风格的红色大气模")
-2. generate_image_by_ideogram(enhanced_prompt)
-3. check_airmold_image(image_path, enhanced_prompt)
-4. If errors found: refine_airmold_prompt(enhanced_prompt, error_feedback)
-5. Regenerate with refined prompt
 """
 
 full_system_prompt = (

@@ -1,208 +1,168 @@
-<h1 align="center">
-  <a href="https://jaaz.app" target="_blank"> Jaaz.app</a>
-  <p align="center">Open source Canva AI alternative</p>
+# James - PneumatCraft AI Design System
 
- <p align="center">
-  <a href="https://jaaz.app">
-    <img src="https://github.com/user-attachments/assets/e0cffb94-8c6f-4867-800a-c144aceb6d54" alt="Jaaz Logo" />
-  </a>
-</p>
+James is an AI-powered design system for pneumatic structures (气模). It generates professional design prompts through multi-candidate enhancement and scoring.
 
-</h2>
-<p align="center">The world's first open-source multimodal canvas creative agent</p>
-<p align="center">This is a substitute for Canva and Manus that prioritizes privacy and is usable locally.</p>
-<p>
-  <b>📣 [New!] Enterprise Cloud “Full” Edition</b> — Private/on-prem deployment & commercial licensing (Docker image or full source). Includes all jaaz.app online features. 
-  <b>30% OFF</b> through <b>Sep 15, 2025</b>. 
-  <a href="mailto:info@jaaz.app">Contact us →</a> info@jaaz.app
-  <br>
-  <br>
-  <b>📣 [New!] 企业云端完整版</b> — 支持<span>私有化部署</span>与<span>商业授权</span>（Docker 镜像或源码交付），包含 jaaz.app 全量线上功能。限时 <b>30% OFF</b>，截止 <b>2025-09-15</b>。 
-  <a href="mailto:info@jaaz.app">了解/洽谈 →</a> info@jaaz.app
-  
-  Download:https://github.com/11cafe/jaaz/releases
-</p>
-<br><br>
+## System Architecture
 
-<p align="center">
-    <a href="https://github.com/11cafe/jaaz/blob/main/README_zh.md">中文版</a>|
-  <a href="https://mxnpt25l6k.feishu.cn/docx/LvcTdlVbFoRAZWxnhBYcqVydnpc">新手指南</a>
-  </p>
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     User Input                              │
+│              (e.g., "生成一个卡通风格的红色大气模")              │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│              enhance_airmold_prompt                         │
+│  • Pattern Matching (matching design specs)                │
+│  • LLM Enhancement (generate 3 candidates)                 │
+│  • Batch Scoring (select best by 4-dimension score)        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Agent: Design Strategy Doc (用户语言)               │
+│  • 分辨率 / Resolution                                     │
+│  • 风格与氛围 / Style & Mood                              │
+│  • 关键视觉元素 / Key Visual Elements                       │
+│  • 构图与布局 / Composition & Layout                       │
+│  • 色彩方案 / Color Palette                                │
+│  • 材质说明 / Material Description                          │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Agent: Generate English Prompt                     │
+│           (Based on Design Strategy Doc)                     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    generate_image                            │
+│         (Flux/ Ideogram/ ComfyUI / etc.)                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│              enhance_airmold_prompt                         │
+│  • Pattern Matching (matching design specs)                │
+│  • LLM Enhancement (generate 3 candidates)                 │
+│  • Batch Scoring (select best by 4-dimension score)        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Agent: English Design Strategy Doc                 │
+│              (Design rationale in English)                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    generate_image                            │
+│         (Flux/ Ideogram/ ComfyUI / etc.)                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│              check_airmold_image (VQA)                      │
+│         (Verify image matches prompt)                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ (if errors)
+┌─────────────────────────────────────────────────────────────┐
+│              refine_airmold_prompt                          │
+│           (Fix errors, regenerate)                          │
+└─────────────────────────────────────────────────────────────┘
+```
 
+## Core Components
 
-<p align="center">
- <a href="https://discord.gg/dS7kuT66wc">
-  <img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white&style=for-the-badge" alt="Discord" />
-  </a>
-   <a href="https://github.com/11cafe/jaaz/stargazers">
-    <img src="https://img.shields.io/github/stars/11cafe/jaaz?style=for-the-badge&logo=github" alt="GitHub Stars" />
-     </a>  
-</p>
-<p align="center">
-Magic Canva!
-  
-"Build" your ideas like playing with LEGO—paint directly, point with arrows, and the AI instantly understands and generates results.
-<img width="900" alt="Screenshot 2025-06-02 at 3 03 49 PM" src="https://github.com/user-attachments/assets/543b170c-14f7-4a73-96bd-909662138592" />
-<img width="900" alt="Screenshot 2025-06-02 at 3 03 49 PM" src="https://github.com/user-attachments/assets/7dd9af32-cc60-4145-9b30-7db96d8fa09a" />
+### Prompt Enhancement (`server/tools/patterns/`)
 
+| Module | Description |
+|--------|-------------|
+| `enhancer.py` | Generates 3 candidate prompts via LLM with pattern matching |
+| `scorer.py` | Rule-based scoring on 4 dimensions |
+| `matcher.py` | Matches user input against design pattern database |
+| `refinement_engine.py` | Refines prompts based on error feedback |
 
-Magic video!
+### Scoring Dimensions
 
-https://github.com/user-attachments/assets/b7abf987-c65d-49b1-8178-82770873c583
+| Dimension | Keywords |
+|----------|----------|
+| Material Accuracy | PVC, TPU, Dacron, 防水, 耐磨 |
+| Structural Soundness | 充气, 接缝, 底座, 支撑 |
+| Visual Quality | 构图, 光影, 背景, 8K |
+| Color Accuracy | 配色, Pantone, 色系 |
 
+**Pass threshold**: overall >= 3.5
 
-Create Viral Shorts with a Single Sentence
-<video src="https://github.com/user-attachments/assets/1c15e792-098a-4557-b310-d9c223f73442" controls width="100%" />
+### Agent System (`server/services/`)
 
+- **image_vide_creator**: Main agent for image/video generation
+- **System prompts**: Defines workflow and tool usage
+- **Tool integration**: enhance_airmold_prompt, score_airmold_prompt, check_airmold_image, refine_airmold_prompt
 
-## ✨ Getting started & staying tuned with us.
+## Project Structure
 
-Star us, and you will receive all release notifications from GitHub without any delay!
-<img width="900" alt="Screenshot 2025-06-02 at 3 03 49 PM" src="https://github.com/user-attachments/assets/1c9a3661-80a4-4fba-a30f-f469898b0aec" />
+```
+jaaz/
+├── react/                 # Frontend (React + Vite)
+│   └── src/
+│       ├── components/    # UI components
+│       ├── pages/        # Page components
+│       └── i18n/         # Internationalization
+├── server/               # Backend
+│   ├── tools/           # Agent tools
+│   │   ├── patterns/    # Pattern matching & enhancement
+│   │   └── enhance_airmold_prompt.py
+│   ├── services/        # Agent services
+│   │   └── langgraph_service/
+│   │       └── configs/ # Agent configurations
+│   └── routers/         # API routes
+└── docs/                # Documentation
+```
 
-## ✨ Key Features
+## Setup
 
-🎬 One-Prompt Image & Video Generation
-Turn one prompt into complete images or videos in seconds.
+### Requirements
+- Python >= 3.12
+- Node.js >= 18
+- Gemini API key (or other LLM API)
 
- -Supports GPT-4o, Midjourney, VEO3, Kling,veo3,seedance etc.
+### Backend
 
- -Auto-optimized prompts & multi-turn refinement
+```bash
+cd server
+pip install -r requirements.txt
+python main.py
+```
 
-🧙 Magic Canvas&Magic Video
-Prompt-free creation — build like Lego.
+### Frontend
 
- -Simple sketching and free combination — AI instantly understands and generates.
+```bash
+cd react
+npm install
+npm run dev
+```
 
- -AI understands and generates instantly
+## API Configuration
 
- -No prompt writing needed
- 
- -Describe steps simply on the video, and AI will generate following them.
+Edit `server/tools/jaaz/` to configure API providers:
 
-🖼️ Infinite Canvas & Visual Storyboarding
-Plan scenes with an unlimited canvas
-
- -Link layouts, manage media visually
-
- -Real-time collaboration supported
-
-🤖 Smart AI Agent System
- -Chat to insert objects, transfer styles, control logic
-
- -Works with local (ComfyUI) & cloud models
-
- -Maintains multi-character coherence
-
-⚙️ Flexible Deployment & Local Assets
- -Fully offline or hybrid setup (Ollama + APIs)
-
- -Built-in library for media & prompts
-
- -Cross-platform: Windows & macOS
-
-🔐 Privacy & Security
- -Local-first, no data leaves your device
-
- -Open-source, no tracking
-
- -Safe for commercial use — you own your data
-
----
-
-## Usage
-Download here: https://jaaz.app/
-
-Click the "Log In" button at the top right of the homepage to access API models. With a low-cost plan, you can seamlessly use a variety of powerful APIs.
-
-<img width="400" alt="Screenshot 2025-06-02 at 3 08 51 PM" src="https://github.com/user-attachments/assets/0055557d-c247-4801-ac3f-01ed4fa775ae" />
-
-
-Start chatting with agent to generate stories or storyboards!
-
-
-
-## Cases
-<img width="889" height="1103" alt="Frame 122" src="https://github.com/user-attachments/assets/90503110-0f5c-4297-bbfe-6d35e3f54d4c" />
-
-- Prompt: Help me place this character in six different scenes, all in front of landmark buildings from around the world. The lighting is harmonious. He takes photos from all over the world, realistic, with warm light, high picture quality, and a picture ratio of 9:16
-
-![814c563b08f6ef44de0c2c31f0fdd00b-min](https://github.com/user-attachments/assets/4e2634b3-9068-47cd-a18f-ddde8f218d25)
-
-<img width="1000" alt="Screenshot 2025-06-02 at 3 51 56 AM" src="https://github.com/user-attachments/assets/5d8efe74-99b0-41bc-aa3e-6f7b92b69c36" />
-
-
-<img width="900" alt="Screenshot 2025-06-02 at 3 51 56 AM" src="https://github.com/user-attachments/assets/186982a9-5e4e-4ac1-a42c-c840092fd616" />
-
-<img width="900" alt="Screenshot 2025-06-02 at 3 03 49 PM" src="https://github.com/user-attachments/assets/b8508efd-def8-40ed-8ab5-62ed3c26de67" />
-
-![image26](https://github.com/user-attachments/assets/2065cabd-af32-43b6-bc01-59a935d9a287)
-
-## Team and Enterprise Support:
-Support for multi-user private deployment of enterprise teams, ensuring privacy and security.
-
-Please contact via email: aifoxdw@gmail.com
-
-<img width="500" alt="Screenshot 2025-06-02 at 3 51 56 AM" src="https://github.com/user-attachments/assets/4a9eb8d2-41b4-44ff-9b17-6db937af56d2" />
-
-
-## Manual Install (For Linux or local builds)
-
-🟠 **Need Python version >=3.12**
-
-First git clone this repo:
-
-`git clone https://github.com/11cafe/localart`
-
-`cd react`
-
-`npm install --force`
-
-`npx vite build`
-
-`cd ../server`
-
-`pip install -r requirements.txt`
-
-`python main.py`
+- **Gemini**: Primary LLM for prompt enhancement
+- **MiniMax**: Alternative provider
+- **ComfyUI**: Local image generation (optional)
 
 ## Development
 
-🟠 **Need Python version >=3.12**
+```bash
+# Start backend
+cd server && python main.py --port 57988
 
-VSCode/Cursor Install Extensions：
+# Start frontend (separate terminal)
+cd react && npm run dev
+```
 
-- Black Formatter by ms-python (ms-python.black-formatter)
+## License
 
-`cd react`
-
-`npm install --force && npm run dev`
-
-`cd server`
-
-`pip install -r requirements.txt`
-
-`python main.py`
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+MIT

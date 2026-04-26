@@ -97,8 +97,8 @@ export default function JaazSetting({
       {/* Provider Header */}
       <div className="flex items-center gap-2 justify-between">
         <div className="flex items-center gap-2">
-          <img src={LOGO_URL} alt="Jaaz" className="w-10 h-10 rounded-full" />
-          <p className="font-bold text-2xl w-fit">Jaaz</p>
+          <img src={LOGO_URL} alt="James" className="w-10 h-10 rounded-full" />
+          <p className="font-bold text-2xl w-fit">James</p>
           {/* <span>✨ Custom Provider</span> */}
         </div>
 
