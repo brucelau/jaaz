@@ -171,59 +171,6 @@ async def _call_gemini_async(prompt: str):
 
 ---
 
-## 🟠 P1 — 高优先级
-
-### 6. 配置：大量硬编码值
-
-| 文件 | 位置 | 硬编码值 | 应改为 |
-|------|------|---------|--------|
-| `scorer.py` | line 49 | `SELENE_URL = "http://100.75.202.111:8080/..."` | `os.getenv("SELENE_URL")` |
-| `scorer.py` | line 48 | `PASS_THRESHOLD = 3.5` | `os.getenv("PASS_THRESHOLD", "3.5")` |
-| `scorer.py` | line 146 | `timeout=60` | 配置化 |
-| `selene_server.py` | line 9 | `MODEL_PATH = "..."` | 环境变量 |
-| `enhancer.py` | line 222 | `gemini-3.1-flash` | 配置化 |
-| `config_service.py` | lines 52-61 | 模型列表 | 配置化 |
-
----
-
-### 7. Selene Server 生产级缺陷
-
-**`selene_server.py`** 问题清单：
-
-| 问题 | 影响 |
-|------|------|
-| 无并发限制 | 高并发时 MPS 内存溢出 |
-| 无请求队列 | 模型过载时直接崩溃 |
-| `/health` 无 model 可用性检查 | 负载均衡无法感知真实状态 |
-| 无优雅关闭 | `Ctrl+C` 时 model 资源不释放 |
-| 启动时同步加载模型 | uvicorn 启动被阻塞 5-10 分钟 |
-| 无 GPU 内存上限 | `device_map="auto"` 不限制最大内存 |
-
-**修复建议**：加 `asyncio.Semaphore` 限制并发，加 `/health/detailed` 检查真实状态。
-
----
-
-### 8. 数据库无索引
-
-**`db_service.py`** — 所有表无索引：
-
-```sql
-CREATE TABLE chat_sessions (canvas_id);  -- 查询条件但无索引
-CREATE TABLE chat_messages (session_id);  -- 查询条件但无索引
-CREATE TABLE canvases (id, updated_at);  -- 排序字段无索引
-```
-
-高并发时 SQLite 会有明显性能问题。
-
-**修复建议**：
-
-```sql
-CREATE INDEX idx_chat_sessions_canvas ON chat_sessions(canvas_id);
-CREATE INDEX idx_chat_messages_session ON chat_messages(session_id);
-CREATE INDEX idx_canvases_updated ON canvases(updated_at DESC);
-```
-
----
 
 ### 9. WebSocket Session 隔离缺失
 
@@ -279,17 +226,7 @@ for tool_id, tool_info in tool_service.get_all_tools().items():
 
 ---
 
-## 🟡 P2 — 中优先级
 
-### 13. 测试覆盖为零
-
-- 无 `tests/` 目录
-- 无 pytest 配置
-- 所有服务使用 module-level singleton，难以 mock
-
-**建议**：至少为 `scorer.py`、`enhancer.py`、`enhance_airmold_prompt.py` 写单元测试，使用 `pytest` + `pytest-asyncio`。
-
----
 
 ### 14. Python 类型提示不足
 
@@ -299,16 +236,7 @@ for tool_id, tool_info in tool_service.get_all_tools().items():
 
 ---
 
-### 15. 日志系统不规范
 
-- 混用 `print()` 和 traceback
-- 无结构化日志（无 JSON log）
-- 无日志级别（`debug/info/warning/error`）
-- 无 request ID 追踪
-
-**建议**：引入 `structlog` 或 `logging.config`。
-
----
 
 ### 16. 多语言硬编码
 
@@ -326,37 +254,7 @@ return "图像检查通过：未发现明显错误。"
 
 ---
 
-### 17. Prompt Injection 风险
 
-`enhancer.py` 和 `scorer.py` 直接将用户输入拼接到 LLM prompt：
-
-```python
-prompt = self._template.format(
-    user_input=user_input,  # 用户输入直接注入
-    ...
-)
-```
-
-恶意用户可通过构造特殊输入影响 Selene 评分或 Gemini 生成。
-
-**建议**：对用户输入做过滤，限制特殊字符或注入模式。
-
----
-
-## 🟢 P3 — 低优先级 / 优化建议
-
-### 18. 连接池缺失
-
-`aiosqlite` 每次请求都新建连接：
-
-```python
-async with aiosqlite.connect(self.db_path) as db:  # 每次新建
-    ...
-```
-
-建议使用连接池或 `aiosqlite.connect` 的 `pool_size` 参数。
-
----
 
 ### 19. `TOOL_MAPPING` 重复注册警告
 

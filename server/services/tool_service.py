@@ -243,10 +243,6 @@ class ToolService:
             logger.error("tool_register_failed", tool="write_plan", error=str(e))
 
     def register_tool(self, tool_id: str, tool_info: ToolInfo):
-        if tool_id in self.tools:
-            logger.debug("tool_already_registered", tool_id=tool_id)
-            return
-
         self.tools[tool_id] = tool_info
 
     # TODO: Check if there will be racing conditions when server just starting up but tools are not ready yet.
