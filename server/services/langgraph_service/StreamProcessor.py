@@ -4,6 +4,7 @@ from typing import Optional, List, Dict, Any, Callable, Awaitable
 from langchain_core.messages import AIMessageChunk, ToolCall, convert_to_openai_messages, ToolMessage
 from langgraph.graph import StateGraph
 import json
+from services.log_service import agent_logger as logger
 
 
 class StreamProcessor:
@@ -85,7 +86,7 @@ class StreamProcessor:
             if isinstance(ai_message_chunk, ToolMessage):
                 # 工具调用结果之后会在 values 类型中发送到前端，这里会更快出现一些
                 oai_message = convert_to_openai_messages([ai_message_chunk])[0]
-                print('👇toolcall res oai_message', oai_message)
+                logger.debug("toolcall_result", oai_message=oai_message)
                 await self.websocket_service(self.session_id, {
                     'type': 'tool_call_result',
                     'id': ai_message_chunk.tool_call_id,
@@ -105,42 +106,28 @@ class StreamProcessor:
             if hasattr(ai_message_chunk, 'tool_call_chunks'):
                 await self._handle_tool_call_chunks(ai_message_chunk.tool_call_chunks)
         except Exception as e:
-            print('🟠error', e)
-            traceback.print_stack()
+            logger.error("stream_chunk_error", error=str(e))
+            traceback.print_exc()
 
     async def _handle_tool_calls(self, tool_calls: List[ToolCall]) -> None:
-        """处理工具调用"""
         self.tool_calls = [tc for tc in tool_calls if tc.get('name')]
-        print('😘tool_call event', tool_calls)
+        logger.debug("tool_call_event", tool_calls=tool_calls)
 
         for tc in self.tool_calls:
             name = tc.get('name', '')
             args = tc.get('args', {})
             if 'generate_image' in name and args.get('prompt'):
-                print(f"\n[English Prompt] [{name}]")
-                print(f"{'='*60}")
-                print(args.get('prompt'))
-                print(f"{'='*60}\n")
+                logger.info("english_prompt_generated", tool=name, prompt=args.get('prompt'))
 
-        # 需要确认的工具列表
         TOOLS_REQUIRING_CONFIRMATION = {
-            # 'generate_video_by_kling_v2_jaaz',
-            # 'generate_video_by_seedance_v1_pro_volces',
-            # 'generate_video_by_seedance_v1_lite_i2v',
-            # 'generate_video_by_seedance_v1_lite_t2v',
-            # 'generate_video_by_seedance_v1_jaaz',
-            # 'generate_video_by_hailuo_02_jaaz',
             'generate_video_by_veo3_fast_jaaz',
         }
 
         for tool_call in self.tool_calls:
             tool_name = tool_call.get('name')
 
-            # 检查是否需要确认
             if tool_name in TOOLS_REQUIRING_CONFIRMATION:
-                # 对于需要确认的工具，不在这里发送事件，让工具函数自己处理
-                print(
-                    f'🔄 Tool {tool_name} requires confirmation, skipping StreamProcessor event')
+                logger.debug("tool_requires_confirmation", tool=tool_name)
                 continue
             else:
                 await self.websocket_service(self.session_id, {
@@ -164,4 +151,4 @@ class StreamProcessor:
                         'text': tool_call_chunk.get('args')
                     })
                 else:
-                    print('🟠no last_streaming_tool_call_id', tool_call_chunk)
+                    logger.warning("no_last_streaming_tool_call_id", chunk=tool_call_chunk)

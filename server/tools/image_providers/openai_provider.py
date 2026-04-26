@@ -6,6 +6,7 @@ from .image_base_provider import ImageProviderBase
 from ..utils.image_utils import get_image_info_and_save, generate_image_id
 from services.config_service import FILES_DIR
 from services.config_service import config_service
+from services.log_service import tool_logger as logger
 
 
 class OpenAIImageProvider(ImageProviderBase):
@@ -105,6 +106,6 @@ class OpenAIImageProvider(ImageProviderBase):
             return mime_type, width, height, filename
 
         except Exception as e:
-            print('Error generating image with OpenAI:', e)
+            logger.error("error_generating_image_openai", error=str(e))
             traceback.print_exc()
             raise e

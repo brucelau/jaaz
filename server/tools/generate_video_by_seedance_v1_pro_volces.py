@@ -1,9 +1,10 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-from langchain_core.tools import tool, InjectedToolCallId  # type: ignore
+from langchain_core.tools import tool, InjectedToolCallId
 from langchain_core.runnables import RunnableConfig
 from tools.video_generation.video_generation_core import generate_video_with_provider
 from .utils.image_utils import process_input_image
+from services.log_service import tool_logger as logger
 
 
 class GenerateVideoBySeedanceV1InputSchema(BaseModel):
@@ -58,7 +59,7 @@ async def generate_video_by_seedance_v1_pro_volces(
         processed_image = await process_input_image(first_image)
         if processed_image:
             processed_input_images = [processed_image]
-            print(f"Using input image for video generation: {first_image}")
+            logger.debug("seedance_pro_using_input_image", image=first_image)
         else:
             raise ValueError(
                 f"Failed to process input image: {first_image}. Please check if the image exists and is valid.")

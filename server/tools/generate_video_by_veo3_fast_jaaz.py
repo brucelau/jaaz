@@ -1,11 +1,12 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-from langchain_core.tools import tool, InjectedToolCallId  # type: ignore
+from langchain_core.tools import tool, InjectedToolCallId
 from langchain_core.runnables import RunnableConfig
 from services.jaaz_service import JaazService
 from tools.video_generation.video_canvas_utils import send_video_start_notification, process_video_result
 from services.tool_confirmation_manager import tool_confirmation_manager
 from services.websocket_service import send_to_websocket
+from services.log_service import tool_logger as logger
 import json
 
 class GenerateVideoByVeo3FastInputSchema(BaseModel):
@@ -26,11 +27,10 @@ async def generate_video_by_veo3_fast_jaaz(
     """
     Generate a video using Veo3 Fast model via Jaaz service
     """
-    print(f'🛠️ Veo3 Fast Video Generation tool_call_id: {tool_call_id}')
     ctx = config.get('configurable', {})
     canvas_id = ctx.get('canvas_id', '')
     session_id = ctx.get('session_id', '')
-    print(f'🛠️ canvas_id {canvas_id} session_id {session_id}')
+    logger.info("veo3_start", tool_call_id=tool_call_id, canvas_id=canvas_id, session_id=session_id)
 
         # 检查是否需要确认
     arguments = {
@@ -83,7 +83,7 @@ async def generate_video_by_veo3_fast_jaaz(
         )
 
     except Exception as e:
-        print(f"Error in Veo3 Fast video generation: {e}")
+        logger.error("veo3_error", error=str(e))
         raise e
 
 

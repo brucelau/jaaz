@@ -1,8 +1,9 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-from langchain_core.tools import tool, InjectedToolCallId  # type: ignore
+from langchain_core.tools import tool, InjectedToolCallId
 from langchain_core.runnables import RunnableConfig
 from tools.utils.image_generation_core import generate_image_with_provider
+from services.log_service import tool_logger as logger
 
 class GenerateImageByImagen4InputSchema(BaseModel):
     prompt: str = Field(
@@ -27,7 +28,7 @@ async def generate_image_by_imagen_4_jaaz(
     ctx = config.get('configurable', {})
     canvas_id = ctx.get('canvas_id', '')
     session_id = ctx.get('session_id', '')
-    print(f'🛠️ canvas_id {canvas_id} session_id {session_id}')
+    logger.debug("imagen4_jaaz_start", canvas_id=canvas_id, session_id=session_id)
     return await generate_image_with_provider(
         canvas_id=canvas_id,
         session_id=session_id,

@@ -1,17 +1,13 @@
-# services/chat_service.py
-
-# Import necessary modules
 import asyncio
 import json
 from typing import Dict, Any, List, Optional
-
-# Import service modules
 from models.tool_model import ToolInfoJson
 from services.db_service import db_service
 from services.langgraph_service import langgraph_multi_agent
 from services.websocket_service import send_to_websocket
 from services.stream_service import add_stream_task, remove_stream_task
 from models.config_model import ModelInfo
+from services.log_service import chat_logger as logger
 
 
 async def handle_chat(data: Dict[str, Any]) -> None:
@@ -41,7 +37,7 @@ async def handle_chat(data: Dict[str, Any]) -> None:
     text_model: ModelInfo = data.get('text_model', {})
     tool_list: List[ToolInfoJson] = data.get('tool_list', [])
 
-    print('👇 chat_service got tool_list', tool_list)
+    logger.debug("chat_service_received", tool_list=tool_list)
 
     # TODO: save and fetch system prompt from db or settings config
     system_prompt: Optional[str] = data.get('system_prompt')
@@ -65,7 +61,7 @@ async def handle_chat(data: Dict[str, Any]) -> None:
         # Await completion of the langgraph_agent task
         await task
     except asyncio.exceptions.CancelledError:
-        print(f"🛑Session {session_id} cancelled during stream")
+        logger.warning("session_cancelled", session_id=session_id)
     finally:
         # Always remove the task from stream_tasks after completion/cancellation
         remove_stream_task(session_id)

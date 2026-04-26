@@ -38,6 +38,7 @@ from routers.comfyui_execution import upload_image
 from services.config_service import FILES_DIR, config_service, IMAGE_FORMATS
 from services.db_service import db_service
 from services.websocket_service import broadcast_session_update, send_to_websocket
+from services.log_service import tool_logger as logger
 
 from .utils.comfyui import ComfyUIWorkflowRunner
 from tools.video_generation.video_canvas_utils import generate_new_video_element
@@ -115,11 +116,10 @@ def build_tool(wf: Dict[str, Any]) -> BaseTool:
         """
         code to call comfyui generating image.
         """
-        print("🛠️ tool_call_id", tool_call_id)
         ctx = config.get("configurable", {})
         canvas_id = ctx.get("canvas_id", "")
         session_id = ctx.get("session_id", "")
-        print("🛠️canvas_id", canvas_id, "session_id", session_id)
+        logger.info("comfy_workflow_start", tool_call_id=tool_call_id, canvas_id=canvas_id, session_id=session_id)
         # Inject the tool call id into the context
         ctx["tool_call_id"] = tool_call_id
         api_url = str(
@@ -300,7 +300,7 @@ def build_tool(wf: Dict[str, Any]) -> BaseTool:
             return f"workflow executed successfully {', '.join(markdown_images)}"
 
         except Exception as e:
-            print(f"Error generating image: {str(e)}")
+            logger.error("image_generation_error", error=str(e))
             traceback.print_exc()
             await send_to_websocket(session_id, {"type": "error", "error": str(e)})
             return f"image generation failed: {str(e)}"

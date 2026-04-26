@@ -7,6 +7,7 @@ from .image_base_provider import ImageProviderBase
 from ..utils.image_utils import get_image_info_and_save, generate_image_id
 from services.config_service import FILES_DIR, config_service
 from utils.http_client import HttpClient
+from services.log_service import tool_logger as logger
 
 
 class WavespeedResponse(BaseModel):
@@ -74,7 +75,7 @@ class WavespeedProvider(ImageProviderBase):
                 await asyncio.sleep(1)
                 async with session.get(result_url, headers=headers) as result_resp:
                     result_data = await result_resp.json()
-                    print("WaveSpeed polling result:", result_data)
+                    logger.debug("wavespeed_polling_result", result=f"{str(result_data)[:200]}...")
 
                     data = result_data.get("data", {})
                     outputs = data.get("outputs", [])
@@ -140,6 +141,6 @@ class WavespeedProvider(ImageProviderBase):
                 return mime_type, width, height, filename
 
         except Exception as e:
-            print('Error generating image with WaveSpeed:', e)
+            logger.error("error_generating_image_wavespeed", error=str(e))
             traceback.print_exc()
             raise e

@@ -23,6 +23,7 @@ Settings Service - 设置服务模块
 import os
 import traceback
 import json
+from services.log_service import app_logger as logger
 
 # 用户数据目录路径，优先使用环境变量，否则使用默认路径
 USER_DATA_DIR = os.getenv("USER_DATA_DIR", os.path.join(
@@ -116,7 +117,7 @@ class SettingsService:
             app_settings = merged_settings
             return merged_settings
         except Exception as e:
-            print(f"Error loading settings: {e}")
+            logger.error("error_loading_settings", error=str(e))
             traceback.print_exc()
             return DEFAULT_SETTINGS
 
@@ -157,7 +158,7 @@ class SettingsService:
             app_settings = merged_settings
             return merged_settings
         except Exception as e:
-            print(f"Error loading raw settings: {e}")
+            logger.error("error_loading_raw_settings", error=str(e))
             return DEFAULT_SETTINGS
 
     def get_proxy_config(self):
@@ -241,7 +242,7 @@ class SettingsService:
             with open(self.settings_file, 'w', encoding='utf-8') as f:
                 json.dump(DEFAULT_SETTINGS, f, indent=2)
         except Exception as e:
-            print(f"Error creating default settings: {e}")
+            logger.error("error_creating_default_settings", error=str(e))
 
     async def update_settings(self, data):
         """
@@ -274,7 +275,7 @@ class SettingsService:
                     with open(self.settings_file, 'r', encoding='utf-8') as f:
                         existing_settings = json.load(f)
                 except Exception as e:
-                    print(f"Error reading existing settings: {e}")
+                    logger.error("error_reading_existing_settings", error=str(e))
 
             # 合并新数据到现有设置
             for key, value in data.items():

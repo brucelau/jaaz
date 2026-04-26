@@ -7,10 +7,10 @@ from services.tool_service import tool_service
 from services.config_service import config_service
 from services.db_service import db_service
 from utils.http_client import HttpClient
-# services
 from models.config_model import ModelInfo
 from typing import List
 from services.tool_service import TOOL_MAPPING
+from services.log_service import app_logger as logger
 
 router = APIRouter(prefix="/api")
 
@@ -24,7 +24,7 @@ def get_ollama_model_list() -> List[str]:
         data = response.json()
         return [model['name'] for model in data.get('models', [])]
     except requests.RequestException as e:
-        print(f"Error querying Ollama: {e}")
+        logger.warning("ollama_query_error", error=str(e))
         return []
 
 
@@ -41,10 +41,10 @@ async def get_comfyui_model_list(base_url: str) -> List[str]:
                     'input', {}).get('required', {}).get('ckpt_name', [[]])[0]
                 return models if isinstance(models, list) else []  # type: ignore
             else:
-                print(f"ComfyUI server returned status {response.status_code}")
+                logger.warning("comfyui_status_error", status=response.status_code)
                 return []
     except Exception as e:
-        print(f"Error querying ComfyUI: {e}")
+        logger.warning("comfyui_query_error", error=str(e))
         return []
 
 # List all LLM models

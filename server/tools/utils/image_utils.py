@@ -8,6 +8,7 @@ from typing import Any, Optional, Tuple
 from nanoid import generate
 from utils.http_client import HttpClient
 from services.config_service import FILES_DIR
+from services.log_service import tool_logger as logger
 
 
 def generate_image_id() -> str:
@@ -49,7 +50,7 @@ async def get_image_info_and_save(
         
         # Store original format for debugging
         original_format = image.format or 'Unknown'
-        print(f"Converting {original_format} image to PNG: {width}x{height}")
+        logger.debug("converting_image_to_png", original_format=original_format, width=width, height=height)
 
         # Handle different color modes properly for PNG conversion
         if image.mode == 'P':
@@ -73,7 +74,7 @@ async def get_image_info_and_save(
             pass
         else:
             # For any other modes, convert to RGB as a safe fallback
-            print(f"Warning: Unusual color mode {image.mode}, converting to RGB")
+            logger.warning("unusual_color_mode", mode=image.mode)
             image = image.convert('RGB')
 
         # Unified format: always PNG
@@ -101,7 +102,7 @@ async def get_image_info_and_save(
                     
                     pnginfo.add_text(str(key), text_value)
                 except Exception as e:
-                    print(f"Warning: Failed to add metadata key '{key}': {e}")
+                    logger.warning("failed_add_metadata", key=key, error=str(e))
                     traceback.print_stack()
 
         # Save as PNG with metadata
@@ -113,11 +114,11 @@ async def get_image_info_and_save(
         else:
             image.save(file_path, format='PNG', optimize=True)
         
-        print(f"Successfully saved as PNG: {file_path}")
+        logger.debug("png_saved", path=file_path)
         return mime_type, width, height, extension
 
     except Exception as e:
-        print(f"Error processing image: {e}")
+        logger.error("error_processing_image", error=str(e))
         raise e
 
 
@@ -150,7 +151,7 @@ async def process_input_image(input_image: str | None) -> str | None:
     try:
         full_path = os.path.join(FILES_DIR, input_image)
         if not os.path.exists(full_path):
-            print(f"Warning: Image file not found: {full_path}")
+            logger.warning("image_file_not_found", path=full_path)
             return None
 
         image = Image.open(full_path)
@@ -172,5 +173,5 @@ async def process_input_image(input_image: str | None) -> str | None:
         return data_url
 
     except Exception as e:
-        print(f"Error processing image {input_image}: {e}")
+        logger.error("error_processing_image", input=input_image, error=str(e))
         return None

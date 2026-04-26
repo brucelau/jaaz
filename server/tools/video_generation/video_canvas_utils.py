@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from typing import Dict, List, Any, Tuple, Optional, Union
 from services.config_service import FILES_DIR
 from services.db_service import db_service
-from services.websocket_service import send_to_websocket, broadcast_session_update  # type: ignore
+from services.websocket_service import send_to_websocket, broadcast_session_update
 from common import DEFAULT_PORT
 from utils.http_client import HttpClient
 import aiofiles
@@ -20,6 +20,7 @@ from pymediainfo import MediaInfo
 from nanoid import generate
 import random
 from utils.canvas import find_next_best_element_position
+from services.log_service import tool_logger as logger
 
 
 class CanvasLockManager:
@@ -63,13 +64,13 @@ async def save_video_to_canvas(
         video_id = generate_video_file_id()
 
         # Download and save video
-        print(f"🎥 Downloading video from: {video_url}")
+        logger.debug("video_downloading", url=video_url)
         mime_type, width, height, extension = await get_video_info_and_save(
             video_url, os.path.join(FILES_DIR, f"{video_id}")
         )
         filename = f"{video_id}.{extension}"
 
-        print(f"🎥 Video saved as: {filename}, dimensions: {width}x{height}")
+        logger.info("video_saved", filename=filename, width=width, height=height)
 
         # Create file data
         file_id = generate_video_file_id()
@@ -143,7 +144,7 @@ async def send_video_completion_notification(
 
 async def send_video_error_notification(session_id: str, error_message: str) -> None:
     """Send WebSocket notification about video generation error"""
-    print(f"🎥 Video generation error: {error_message}")
+    logger.error("video_error_notification", session_id=session_id, error=error_message)
     await send_to_websocket(session_id, {
         "type": "error",
         "error": error_message
@@ -191,7 +192,7 @@ async def process_video_result(
         )
 
         provider_info = f" using {provider_name}" if provider_name else ""
-        print(f"🎥 Video generation completed{provider_info}: {filename}")
+        logger.info("video_generation_completed", provider_info=provider_info, filename=filename)
         return format_video_success_message(filename)
 
     except Exception as e:
@@ -216,7 +217,7 @@ async def get_video_info_and_save(
     temp_path = f"{file_path_without_extension}.mp4"
     async with aiofiles.open(temp_path, "wb") as out_file:
         await out_file.write(video_content)
-    print("🎥 Video saved to", temp_path)
+    logger.debug("video_temp_saved", path=temp_path)
 
     try:
         media_info = MediaInfo.parse(temp_path)  # type: ignore
@@ -227,7 +228,7 @@ async def get_video_info_and_save(
             if track.track_type == "Video":  # type: ignore
                 width = int(track.width or 0)  # type: ignore
                 height = int(track.height or 0)  # type: ignore
-                print(f"Width: {width}, Height: {height}")
+                logger.debug("video_dimensions", width=width, height=height)
                 break
 
         extension = "mp4"  # Default to mp4, can be flexible based on codec_name
@@ -235,13 +236,11 @@ async def get_video_info_and_save(
         # Get mime type
         mime_type = mimetypes.types_map.get(".mp4", "video/mp4")
 
-        print(
-            f"🎥 Video info - width: {width}, height: {height}, mime_type: {mime_type}, extension: {extension}"
-        )
+        logger.debug("video_info", width=width, height=height, mime_type=mime_type, extension=extension)
 
         return mime_type, width, height, extension
     except Exception as e:
-        print(f"Error probing video file {temp_path}: {str(e)}")
+        logger.error("video_probe_error", path=temp_path, error=str(e))
         raise e
 
 

@@ -1,9 +1,10 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-from langchain_core.tools import tool, InjectedToolCallId  # type: ignore
+from langchain_core.tools import tool, InjectedToolCallId
 from langchain_core.runnables import RunnableConfig
 from .video_generation import generate_video_with_provider
 from .utils.image_utils import process_input_image
+from services.log_service import tool_logger as logger
 
 
 class GenerateVideoBySeedanceV1LiteInputI2VSchema(BaseModel):
@@ -87,8 +88,7 @@ async def generate_video_by_seedance_v1_lite_i2v(
         if processed_first_image and processed_last_frame:
             processed_input_images = [
                 processed_first_image, processed_last_frame]
-            print(
-                f"Using input images for video generation: {first_image}, {last_frame}")
+            logger.debug("seedance_lite_using_input_images", first=first_image, last=last_frame)
         else:
             raise ValueError(
                 f"Failed to process input image: {first_image}. Please check if the image exists and is valid.")
@@ -97,7 +97,7 @@ async def generate_video_by_seedance_v1_lite_i2v(
         processed_image = await process_input_image(input_images[0])
         if processed_image:
             processed_input_images = [processed_image]
-            print(f"Using input image for video generation: {input_images[0]}")
+            logger.debug("seedance_lite_using_input_image", image=input_images[0])
         else:
             raise ValueError(
                 f"Failed to process input image: {input_images[0]}. Please check if the image exists and is valid.")

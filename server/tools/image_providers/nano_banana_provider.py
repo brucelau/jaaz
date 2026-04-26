@@ -9,6 +9,7 @@ from typing import Optional, Any, Tuple
 from .image_base_provider import ImageProviderBase
 from ..utils.image_utils import generate_image_id
 from services.config_service import FILES_DIR, config_service
+from services.log_service import tool_logger as logger
 
 
 class NanoBananaProvider(ImageProviderBase):
@@ -99,6 +100,6 @@ class NanoBananaProvider(ImageProviderBase):
             mime_type, width, height, filename = await asyncio.to_thread(_call_api)
             return mime_type, width, height, filename
         except Exception as e:
-            print('Error generating image with Nano Banana:', e)
+            logger.error("error_generating_image_nano_banana", error=str(e))
             traceback.print_exc()
             raise e

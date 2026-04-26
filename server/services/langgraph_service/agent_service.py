@@ -4,14 +4,15 @@ from .StreamProcessor import StreamProcessor
 from .agent_manager import AgentManager
 import traceback
 from utils.http_client import HttpClient
-from langgraph_swarm import create_swarm  # type: ignore
+from langgraph_swarm import create_swarm
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
-from services.websocket_service import send_to_websocket  # type: ignore
+from services.websocket_service import send_to_websocket
 from services.config_service import config_service
 from typing import Optional, List, Dict, Any, cast, Set, TypedDict
 from models.config_model import ModelInfo
+from services.log_service import agent_logger as logger
 
 
 class ContextInfo(TypedDict):
@@ -54,10 +55,8 @@ def _fix_chat_history(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 elif tool_call_id:
                     removed_calls.append(tool_call_id)
 
-            # 记录修复信息
             if removed_calls:
-                print(
-                    f"🔧 修复消息历史：移除了 {len(removed_calls)} 个不完整的工具调用: {removed_calls}")
+                logger.info("chat_history_fixed", removed_count=len(removed_calls), removed_ids=removed_calls)
 
             # 更新消息
             if valid_tool_calls:
@@ -108,11 +107,11 @@ async def langgraph_multi_agent(
             system_prompt or ""
         )
         agent_names = [agent.name for agent in agents]
-        print('👇agent_names', agent_names)
+        logger.debug("agent_names", names=agent_names)
         last_agent = AgentManager.get_last_active_agent(
             fixed_messages, agent_names)
 
-        print('👇last_agent', last_agent)
+        logger.debug("last_active_agent", name=last_agent)
 
         # 4. 创建智能体群组
         swarm = create_swarm(
@@ -144,7 +143,7 @@ def _create_text_model(text_model: ModelInfo) -> Any:
     api_key = config_service.app_config.get(  # type: ignore
         provider, {}).get("api_key", "")
 
-    print(f"🔍 _create_text_model: provider={provider}, model={model}, url={url}")
+    logger.debug("create_text_model", provider=provider, model=model, url=url)
 
     # TODO: Verify if max token is working
     # max_tokens = text_model.get('max_tokens', 8148)
@@ -176,11 +175,8 @@ def _create_text_model(text_model: ModelInfo) -> Any:
 
 
 async def _handle_error(error: Exception, session_id: str) -> None:
-    """处理错误"""
-    print('Error in langgraph_agent', error)
     tb_str = traceback.format_exc()
-    print(f"Full traceback:\n{tb_str}")
-    traceback.print_exc()
+    logger.error("langgraph_agent_error", error=str(error), traceback=tb_str)
 
     await send_to_websocket(session_id, cast(Dict[str, Any], {
         'type': 'error',

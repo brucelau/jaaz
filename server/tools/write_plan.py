@@ -1,11 +1,9 @@
-from asyncio import sleep
-import asyncio
 from pydantic import BaseModel, Field
-from typing import Optional, Annotated
+from typing import Optional, Annotated, List
 from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import InjectedToolCallId
-from typing import List
+from services.log_service import tool_logger as logger
 
 class Step(BaseModel):
     title: str
@@ -33,5 +31,5 @@ def write_plan_tool(
     config: RunnableConfig,
     tool_call_id: Annotated[str, InjectedToolCallId],
 ) -> str:
-    print("write_plan_tool")
+    logger.debug("write_plan_called")
     return "<hide_in_user_ui> Plan made. Now you can start executing the plan, or handoff the task to the suitable agent who specializes in the steps of the plan.</hide_from_user>"

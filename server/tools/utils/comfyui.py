@@ -15,6 +15,7 @@ from services.config_service import (
 )
 from routers.comfyui_execution import execute
 from tools.video_generation.video_canvas_utils import get_video_info_and_save
+from services.log_service import tool_logger as logger
 
 
 async def detect_file_type_comprehensive(url):
@@ -131,7 +132,7 @@ class ComfyUIGenerator():
             workflow["3"]["inputs"]["seed"] = random.randint(1, 2**32)
 
         execution = await execute(workflow, api_url, ctx=ctx)
-        print("🦄image execution outputs", execution.outputs)
+        logger.debug("image_execution_outputs", outputs=execution.outputs)
         url = execution.outputs[0]
 
         # get image dimensions
@@ -164,7 +165,7 @@ class ComfyUIWorkflowRunner():
         execution = await execute(
             self.workflow, self.base_url, local_paths=True, ctx=ctx
         )
-        print("🦄workflow execution outputs", execution.outputs)
+        logger.debug("workflow_execution_outputs", outputs=execution.outputs)
 
         results = []
         for url in execution.outputs:

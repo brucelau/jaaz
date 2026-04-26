@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from services.config_service import USER_DATA_DIR
 from typing import List, Dict, Any
 import io
+from services.log_service import app_logger as logger
 
 router = APIRouter(prefix="/api")
 
@@ -42,7 +43,7 @@ async def create_file(request: Request):
         new_base = f"{name} {counter}{ext}"
         candidate_path = os.path.join(dir_name, new_base)
         counter += 1
-    print('candidate_path', candidate_path)
+    logger.debug("create_file_candidate_path", path=candidate_path)
     os.makedirs(os.path.dirname(candidate_path), exist_ok=True)
     with open(candidate_path, "w") as f:
         f.write("")

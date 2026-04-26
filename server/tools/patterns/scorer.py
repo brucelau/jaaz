@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 import re
+from services.log_service import tool_logger as logger
 
 
 @dataclass
@@ -138,7 +139,7 @@ class AirMoldScorer:
 
         try:
             import requests
-            print(f"[Selene Scoring] Prompt: {prompt[:80]}...")
+            logger.info("selene_scoring", prompt=f"{prompt[:80]}...")
             resp = requests.post(
                 self.SELENE_URL,
                 json={
@@ -150,7 +151,7 @@ class AirMoldScorer:
             )
             if resp.status_code == 200:
                 result_text = resp.json()["choices"][0]["message"]["content"]
-                print(f"[Selene Response] {result_text[:200]}...")
+                logger.info("selene_response", response=f"{result_text[:200]}...")
                 return self._parse_selene_response(result_text, prompt)
         except Exception:
             pass

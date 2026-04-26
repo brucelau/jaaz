@@ -1,10 +1,9 @@
-# services/OpenAIAgents_service/jaaz_service.py
-
 import asyncio
 import aiohttp
 from typing import Dict, Any, Optional, List
 from utils.http_client import HttpClient
 from services.config_service import config_service
+from services.log_service import tool_logger as logger
 
 
 class JaazService:
@@ -26,7 +25,7 @@ class JaazService:
         if not self.api_url.endswith('/api/v1'):
             self.api_url = f"{self.api_url}/api/v1"
 
-        print(f"✅ Jaaz service initialized with API URL: {self.api_url}")
+        logger.info("jaaz_service_init", api_url=self.api_url)
 
     def _is_configured(self) -> bool:
         """检查 Jaaz API 是否已配置"""
@@ -51,7 +50,7 @@ class JaazService:
         """
         try:
             if not image_content or not image_content.startswith('data:image/'):
-                print("❌ Invalid image content format")
+                logger.error("invalid_image_format")
                 return ""
 
             async with HttpClient.create_aiohttp() as session:
@@ -67,19 +66,18 @@ class JaazService:
                         data = await response.json()
                         task_id = data.get('task_id', '')
                         if task_id:
-                            print(f"✅ Magic task created: {task_id}")
+                            logger.info("magic_task_created", task_id=task_id)
                             return task_id
                         else:
-                            print("❌ No task_id in response")
+                            logger.error("no_task_id_in_response")
                             return ""
                     else:
                         error_text = await response.text()
-                        print(
-                            f"❌ Failed to create magic task: {response.status} - {error_text}")
+                        logger.error("failed_to_create_magic_task", status=response.status, error_text=error_text)
                         return ""
 
         except Exception as e:
-            print(f"❌ Error creating magic task: {e}")
+            logger.error("error_creating_magic_task", error=str(e))
             return ""
 
     async def create_video_task(
@@ -133,7 +131,7 @@ class JaazService:
                     data = await response.json()
                     task_id = data.get('task_id', '')
                     if task_id:
-                        print(f"✅ Video task created: {task_id}")
+                        logger.info("video_task_created", task_id=task_id)
                         return task_id
                     else:
                         raise Exception("No task_id in response")
@@ -178,8 +176,7 @@ class JaazService:
                             status = task.get('status')
 
                             if status == 'succeeded':
-                                print(
-                                    f"✅ Task {task_id} completed successfully")
+                                logger.info("task_completed", task_id=task_id)
                                 return task
                             elif status == 'failed':
                                 error_msg = task.get('error', 'Unknown error')
@@ -213,27 +210,26 @@ class JaazService:
             # 1. 创建任务
             task_id = await self.create_magic_task(image_content)
             if not task_id:
-                print("❌ Failed to create magic task")
+                logger.error("failed_to_create_magic_task")
                 return {"error": "Failed to create magic task"}
 
             # 2. 等待任务完成
             result = await self.poll_for_task_completion(task_id, max_attempts=120, interval=5.0) # 10 分钟
             if not result:
-                print("❌ Magic generation failed")
+                logger.error("magic_generation_failed")
                 return {"error": "Magic generation failed"}
 
             if not result.get('result_url'):
                 error_msg = result.get('error', 'No result URL found')
-                print(f"❌ Magic generation failed: {error_msg}")
+                logger.error("magic_generation_failed", error=error_msg)
                 return {"error": f"Magic generation failed: {error_msg}"}
 
-            print(
-                f"✅ Magic image generated successfully: {result.get('result_url')}")
+            logger.info("magic_image_generated", url=result.get('result_url'))
             return result
 
         except Exception as e:
             error_msg = f"Error in magic image generation: {str(e)}"
-            print(f"❌ {error_msg}")
+            logger.error("magic_error", error=error_msg)
             return {"error": error_msg}
 
     async def generate_video(
@@ -289,8 +285,7 @@ class JaazService:
         if not result.get('result_url'):
             raise Exception("No result URL found in video generation response")
 
-        print(
-            f"✅ Video generated successfully: {result.get('result_url')}")
+        logger.info("video_generated", url=result.get('result_url'))
         return result
 
     async def generate_video_by_seedance(
@@ -350,7 +345,7 @@ class JaazService:
                     error_text = await response.text()
                     raise Exception(f"Failed to create Seedance video task: HTTP {response.status} - {error_text}")
 
-        print(f"✅ Seedance video task created: {task_id}")
+        logger.info("seedance_video_task_created", task_id=task_id)
 
         # 2. 等待任务完成
         result = await self.poll_for_task_completion(task_id)
@@ -363,8 +358,7 @@ class JaazService:
         if not result.get('result_url'):
             raise Exception("No result URL found in Seedance video generation response")
 
-        print(
-            f"✅ Seedance video generated successfully: {result.get('result_url')}")
+        logger.info("seedance_video_generated", url=result.get('result_url'))
         return result
 
     async def create_midjourney_task(
@@ -404,7 +398,7 @@ class JaazService:
                     data = await response.json()
                     task_id = data.get('task_id', '')
                     if task_id:
-                        print(f"✅ Midjourney task created: {task_id}")
+                        logger.info("midjourney_task_created", task_id=task_id)
                         return task_id
                     else:
                         raise Exception("No task_id in response")
@@ -444,7 +438,7 @@ class JaazService:
 
         # 2. 等待任务完成
         task_result = await self.poll_for_task_completion(task_id, max_attempts=150, interval=2.0)
-        print(f"🎨 Midjourney task result: {task_result}")
+        logger.info("midjourney_task_result", result=f"{task_result[:100]}...")
         if not task_result:
             raise Exception("Midjourney image generation failed")
 
@@ -455,7 +449,7 @@ class JaazService:
             raise Exception("No result found in Midjourney image generation response")
 
         result = task_result.get('result')
-        print(f"✅ Midjourney image generated successfully: {result}")
+        logger.info("midjourney_image_generated", result=f"{result[:100]}...")
         return result or {}
 
     def is_configured(self) -> bool:

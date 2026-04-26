@@ -12,6 +12,7 @@ from tools.patterns import (
     VQAChecker,
     get_vqa_checker,
 )
+from services.log_service import tool_logger as logger
 
 
 _patterns_matcher = PatternMatcher()
@@ -79,40 +80,45 @@ async def enhance_airmold_prompt(
     best_score_info = None
     all_feedback = []
 
-    print(f"\n{'='*60}")
-    print(f"[Enhance Flow] Input: {user_input}")
-    print(f"{'='*60}")
+    logger.info("enhance_flow_start", user_input=user_input)
 
     for attempt in range(max_retries):
         feedback = all_feedback[-1:] if attempt > 0 and all_feedback else None
 
-        print(f"\n[Attempt {attempt + 1}] Generating candidate...")
+        logger.info("attempt", attempt=attempt + 1, step="generating_candidate")
         result = enhancer.enhance(user_input, feedback=feedback)
         candidate = result.enhanced_prompt
-        print(f"[Attempt {attempt + 1}] Candidate: {candidate[:100]}...")
+        logger.debug("attempt", attempt=attempt + 1, step="candidate_generated", candidate=f"{candidate[:100]}...")
 
-        print(f"[Attempt {attempt + 1}] Calling Selene to score...")
+        logger.info("attempt", attempt=attempt + 1, step="calling_selene")
         eval_result = scorer.evaluate_with_feedback(candidate, feedback)
         score = eval_result["score"]
 
-        print(f"[Attempt {attempt + 1}] Selene Score: material={score['material_accuracy']}, structural={score['structural_soundness']}, visual={score['visual_quality']}, color={score['color_accuracy']}, overall={score['overall']}")
-        print(f"[Attempt {attempt + 1}] Pass: {eval_result['pass']}")
+        logger.info("attempt",
+            attempt=attempt + 1,
+            step="selene_scored",
+            material=score['material_accuracy'],
+            structural=score['structural_soundness'],
+            visual=score['visual_quality'],
+            color=score['color_accuracy'],
+            overall=score['overall'],
+            pass_=eval_result['pass']
+        )
 
         if eval_result["pass"]:
-            print(f"[Attempt {attempt + 1}] ACCEPTED!")
+            logger.info("attempt", attempt=attempt + 1, step="accepted", candidate=f"{candidate[:100]}...")
             best_prompt = candidate
             best_score_info = eval_result
             break
 
         if eval_result["suggestions"]:
             suggestion = eval_result["suggestions"][0]
-            print(f"[Attempt {attempt + 1}] Feedback: {suggestion}")
+            logger.info("attempt", attempt=attempt + 1, step="feedback", suggestion=suggestion)
             all_feedback.append(suggestion)
 
         best_prompt = candidate
 
-    print(f"\n[Final] Selected: {best_prompt[:100]}...")
-    print(f"{'='*60}\n")
+    logger.info("enhance_flow_end", selected=f"{best_prompt[:100]}..." if best_prompt else None)
 
     if best_prompt is None:
         best_prompt = user_input

@@ -10,6 +10,7 @@ from .image_base_provider import ImageProviderBase
 from ..utils.image_utils import get_image_info_and_save, generate_image_id
 from services.config_service import FILES_DIR, config_service
 from routers.comfyui_execution import execute
+from services.log_service import tool_logger as logger
 
 
 class ComfyUIResponse(BaseModel):
@@ -134,7 +135,7 @@ class ComfyUIProvider(ImageProviderBase, provider_name="comfyui"):
 
             # Execute workflow
             execution = await execute(workflow, api_url, ctx=ctx)
-            print("🦄image execution outputs", execution.outputs)
+            logger.info("comfyui_outputs", outputs=execution.outputs)
             url = execution.outputs[0]
 
             # Save the image
@@ -146,7 +147,7 @@ class ComfyUIProvider(ImageProviderBase, provider_name="comfyui"):
             return mime_type, width, height, filename
 
         except Exception as e:
-            print('Error generating image with ComfyUI:', e)
+            logger.error("comfyui_error", error=str(e))
             traceback.print_exc()
             raise e
 
@@ -186,7 +187,7 @@ class ComfyUIWorkflowProvider(ImageProviderBase, provider_name="comfyui_workflow
             execution = await execute(
                 self.workflow, self.base_url, local_paths=True, ctx=ctx
             )
-            print("🦄workflow execution outputs", execution.outputs)
+            logger.info("comfyui_workflow_outputs", outputs=execution.outputs)
 
             url = execution.outputs[0]
 
@@ -200,6 +201,6 @@ class ComfyUIWorkflowProvider(ImageProviderBase, provider_name="comfyui_workflow
             return mime_type, width, height, filename
 
         except Exception as e:
-            print('Error generating image with ComfyUI Workflow:', e)
+            logger.error("comfyui_workflow_error", error=str(e))
             traceback.print_exc()
             raise e

@@ -1,11 +1,12 @@
 from typing import List, Dict, Any, Optional
-from langgraph.prebuilt import create_react_agent  # type: ignore
+from langgraph.prebuilt import create_react_agent
 from langgraph.graph.graph import CompiledGraph
 from langchain_core.tools import BaseTool
 from models.tool_model import ToolInfoJson
 from services.langgraph_service.configs.image_vide_creator_config import ImageVideoCreatorAgentConfig
 from .configs import PlannerAgentConfig, create_handoff_tool, BaseAgentConfig
 from services.tool_service import tool_service
+from services.log_service import agent_logger as logger
 
 
 class AgentManager:
@@ -34,8 +35,7 @@ class AgentManager:
         image_tools =  [tool for tool in tool_list if tool.get('type') == 'image']
         video_tools = [tool for tool in tool_list if tool.get('type') == 'video']
 
-        print(f"📸 图像工具: {image_tools}")
-        print(f"🎬 视频工具: {video_tools}")
+        logger.debug("agent_tools", image_tools=image_tools, video_tools=video_tools)
 
         planner_config = PlannerAgentConfig()
         planner_agent = AgentManager._create_langgraph_agent(

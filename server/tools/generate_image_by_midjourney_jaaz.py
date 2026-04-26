@@ -1,6 +1,6 @@
 from typing import Annotated, List, Dict, Any
 from pydantic import BaseModel, Field
-from langchain_core.tools import tool, InjectedToolCallId  # type: ignore
+from langchain_core.tools import tool, InjectedToolCallId
 from langchain_core.runnables import RunnableConfig
 from services.jaaz_service import JaazService
 from tools.utils.image_canvas_utils import save_image_to_canvas, send_image_start_notification, send_image_error_notification
@@ -8,6 +8,7 @@ from common import DEFAULT_PORT
 import os
 from tools.utils.image_utils import get_image_info_and_save, generate_image_id, process_input_image
 from services.config_service import FILES_DIR
+from services.log_service import tool_logger as logger
 
 
 class GenerateImageByMidjourneyInputSchema(BaseModel):
@@ -33,11 +34,10 @@ async def generate_image_by_midjourney_jaaz(
     """
     Generate images using Midjourney model via Jaaz service
     """
-    print(f'🎨 Midjourney Image Generation tool_call_id: {tool_call_id}')
     ctx = config.get('configurable', {})
     canvas_id = ctx.get('canvas_id', '')
     session_id = ctx.get('session_id', '')
-    print(f'🎨 canvas_id {canvas_id} session_id {session_id}')
+    logger.info("midjourney_start", tool_call_id=tool_call_id, canvas_id=canvas_id, session_id=session_id)
 
     # Inject the tool call id into the context
     ctx['tool_call_id'] = tool_call_id
@@ -57,7 +57,7 @@ async def generate_image_by_midjourney_jaaz(
             processed_image = await process_input_image(first_image)
             if processed_image:
                 processed_input_images = [processed_image]
-                print(f"Using input image for video generation: {first_image}")
+                logger.debug("midjourney_using_input_image", image=first_image)
             else:
                 raise ValueError(
                     f"Failed to process input image: {first_image}. Please check if the image exists and is valid.")
@@ -78,7 +78,7 @@ async def generate_image_by_midjourney_jaaz(
         if not images or len(images) == 0:
             raise Exception("No images found in Midjourney result")
 
-        print(f"🎨 Midjourney generated {len(images)} images")
+        logger.info("midjourney_images_generated", count=len(images))
 
         # Save all images to canvas and collect results
         saved_images: List[Dict[str, Any]] = []
@@ -86,7 +86,7 @@ async def generate_image_by_midjourney_jaaz(
             try:
                 image_url = image_data.get('url')
                 if not image_url:
-                    print(f"Warning: No URL found for image {i}")
+                    logger.warning("midjourney_no_url", image_index=i)
                     continue
 
                 # Download and save the image
@@ -120,10 +120,10 @@ async def generate_image_by_midjourney_jaaz(
                     "original_data": image_data
                 })
 
-                print(f"🎨 Saved image {i+1}/{len(images)}: {filename}")
+                logger.info("midjourney_image_saved", index=i+1, total=len(images), filename=filename)
 
             except Exception as e:
-                print(f"Error saving image {i}: {e}")
+                logger.error("midjourney_save_image_error", index=i, error=str(e))
                 # Continue with other images even if one fails
                 continue
 
@@ -139,12 +139,12 @@ async def generate_image_by_midjourney_jaaz(
 
         result_message = f"Midjourney generated {len(saved_images)} images successfully:\n\n" + "\n\n".join(image_links)
 
-        print(f"🎨 Midjourney generation completed: {len(saved_images)} images saved")
+        logger.info("midjourney_completed", saved_count=len(saved_images))
         return result_message
 
     except Exception as e:
         error_message = f"Error in Midjourney image generation: {str(e)}"
-        print(f"🎨 {error_message}")
+        logger.error("midjourney_error", error=str(e))
 
         # Send error notification
         await send_image_error_notification(session_id, error_message)

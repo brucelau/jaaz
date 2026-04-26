@@ -12,6 +12,7 @@ import httpx
 import aiofiles
 from mimetypes import guess_type
 from utils.http_client import HttpClient
+from services.log_service import app_logger as logger
 
 router = APIRouter(prefix="/api")
 os.makedirs(FILES_DIR, exist_ok=True)
@@ -19,7 +20,7 @@ os.makedirs(FILES_DIR, exist_ok=True)
 # 上传图片接口，支持表单提交
 @router.post("/upload_image")
 async def upload_image(file: UploadFile = File(...), max_size_mb: float = 3.0):
-    print('🦄upload_image file', file.filename)
+    logger.debug("upload_image", filename=file.filename)
     # 生成文件 ID 和文件名
     file_id = generate_file_id()
     filename = file.filename or ''
@@ -37,7 +38,7 @@ async def upload_image(file: UploadFile = File(...), max_size_mb: float = 3.0):
         
         # Check if compression is needed
         if original_size_mb > max_size_mb:
-            print(f'🦄 Image size ({original_size_mb:.2f}MB) exceeds limit ({max_size_mb}MB), compressing...')
+            logger.info("image_compressing", original_mb=round(original_size_mb, 2), limit_mb=max_size_mb)
             
             # Convert to RGB if necessary (for JPEG compression)
             if img.mode in ('RGBA', 'LA', 'P'):
@@ -64,7 +65,7 @@ async def upload_image(file: UploadFile = File(...), max_size_mb: float = 3.0):
                 # compressed_img.save(file_path, format='JPEG', quality=95, optimize=True)
             
             final_size_mb = len(compressed_content) / (1024 * 1024)
-            print(f'🦄 Compressed from {original_size_mb:.2f}MB to {final_size_mb:.2f}MB')
+            logger.info("image_compressed", from_mb=round(original_size_mb, 2), to_mb=round(final_size_mb, 2))
         else:
             # Determine the file extension from original file
             mime_type, _ = guess_type(filename)
@@ -88,7 +89,7 @@ async def upload_image(file: UploadFile = File(...), max_size_mb: float = 3.0):
             await run_in_threadpool(img.save, file_path, format=save_format)
 
     # 返回文件信息
-    print('🦄upload_image file_path', file_path)
+    logger.debug("upload_image_done", file_path=file_path)
     return {
         'file_id': f'{file_id}.{extension}',
         'url': f'http://localhost:{DEFAULT_PORT}/api/file/{file_id}.{extension}',
@@ -148,7 +149,7 @@ def compress_image(img: Image.Image, max_size_mb: float) -> bytes:
 @router.get("/file/{file_id}")
 async def get_file(file_id: str):
     file_path = os.path.join(FILES_DIR, f'{file_id}')
-    print('🦄get_file file_path', file_path)
+    logger.debug("get_file", file_path=file_path)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(file_path)
@@ -171,9 +172,9 @@ async def get_object_info(data: dict):
                     status_code=response.status_code, detail=f"ComfyUI server returned status {response.status_code}")
     except Exception as e:
         if "ConnectError" in str(type(e)) or "timeout" in str(e).lower():
-            print(f"ComfyUI connection error: {str(e)}")
+            logger.error("comfyui_connection_error", error=str(e))
             raise HTTPException(
                 status_code=503, detail="ComfyUI server is not available. Please make sure ComfyUI is running.")
-        print(f"Unexpected error connecting to ComfyUI: {str(e)}")
+        logger.error("comfyuiUnexpected_error", error=str(e))
         raise HTTPException(
             status_code=500, detail=f"Failed to connect to ComfyUI: {str(e)}")

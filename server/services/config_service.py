@@ -4,6 +4,7 @@ import traceback
 import aiofiles
 import toml
 from typing import Dict, TypedDict, Literal, Optional
+from services.log_service import app_logger as logger
 
 # 定义配置文件的类型结构
 
@@ -109,12 +110,10 @@ class ConfigService:
 
             # Check if config file exists
             if not self.exists_config():
-                print(
-                    f"Config file not found at {self.config_file}, creating default configuration")
-                # Create default config file
+                logger.info("config_not_found", path=self.config_file, msg="creating_default")
                 with open(self.config_file, "w") as f:
                     toml.dump(self.app_config, f)
-                print(f"Default config file created at {self.config_file}")
+                logger.info("config_created", path=self.config_file)
                 self.initialized = True
                 return
 
@@ -139,7 +138,7 @@ class ConfigService:
             if 'jaaz' in self.app_config:
                 self.app_config['jaaz']['url'] = self._get_jaaz_url()
         except Exception as e:
-            print(f"Error loading config: {e}")
+            logger.error("config_load_error", error=str(e))
             traceback.print_exc()
         finally:
             self.initialized = True

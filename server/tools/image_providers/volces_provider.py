@@ -11,6 +11,7 @@ from ..utils.image_utils import get_image_info_and_save, generate_image_id
 from tools.video_generation_utils import get_image_base64
 from services.config_service import FILES_DIR, config_service
 from utils.http_client import HttpClient
+from services.log_service import tool_logger as logger
 
 
 class VolcesImagesResponse(BaseModel):
@@ -153,7 +154,7 @@ class VolcesProvider(ImageProviderBase):
 
                         result_dict = await response.json()
                         result = result_dict["data"][0]["url"]
-                        print(f"👇SeedEdit Url: {result}")
+                        logger.info("seededit_url", url=result)
 
             else:
                 result = client.images.generate(
@@ -166,10 +167,10 @@ class VolcesProvider(ImageProviderBase):
             return await self._process_response(result, "Volces")
 
         except OpenAIError as e:
-            print("Error generating image with Volces:", e)
+            logger.error("volces_image_error", error=str(e))
             traceback.print_exc()
             raise e
         except Exception as e:
-            print("Error generating image with Volces:", e)
+            logger.error("volces_image_error", error=str(e))
             traceback.print_exc()
             raise e

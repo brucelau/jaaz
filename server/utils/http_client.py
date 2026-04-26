@@ -28,6 +28,7 @@ import httpx
 from typing import Optional, Dict, Any, AsyncGenerator, Generator
 from contextlib import asynccontextmanager, contextmanager
 import aiohttp
+from services.log_service import tool_logger as logger
 
 
 class HttpClient:
@@ -42,7 +43,7 @@ class HttpClient:
             try:
                 cls._ssl_context = ssl.create_default_context(cafile=certifi.where())
             except Exception as e:
-                print(f"⚠️ Failed to create SSL context with certifi: {e}")
+                logger.warning("ssl_context_certifi_failed", error=str(e))
                 cls._ssl_context = ssl.create_default_context()
         return cls._ssl_context
 

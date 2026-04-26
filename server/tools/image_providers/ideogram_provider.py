@@ -7,6 +7,7 @@ from typing import Optional, Any, Tuple
 from .image_base_provider import ImageProviderBase
 from ..utils.image_utils import get_image_info_and_save, generate_image_id
 from services.config_service import FILES_DIR, config_service
+from services.log_service import tool_logger as logger
 
 
 class IdeogramProvider(ImageProviderBase):
@@ -72,7 +73,7 @@ class IdeogramProvider(ImageProviderBase):
             mime_type, width, height, filename = await asyncio.to_thread(_call_api)
             return mime_type, width, height, filename
         except Exception as e:
-            print('Error generating image with Ideogram:', e)
+            logger.error("ideogram_error", error=str(e))
             traceback.print_exc()
             raise e
 

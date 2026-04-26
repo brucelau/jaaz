@@ -9,6 +9,7 @@ from tools.utils.image_utils import get_image_info_and_save
 from services.config_service import FILES_DIR
 from common import DEFAULT_PORT
 from ..jaaz_service import JaazService
+from services.log_service import agent_logger as logger
 
 
 async def create_jaaz_response(messages: List[Dict[str, Any]], session_id: str = "", canvas_id: str = "") -> Dict[str, Any]:
@@ -43,7 +44,7 @@ async def create_jaaz_response(messages: List[Dict[str, Any]], session_id: str =
         try:
             jaaz_service = JaazService()
         except ValueError as e:
-            print(f"❌ Jaaz service configuration error: {e}")
+            logger.error("jaaz_service_config_error", error=str(e))
             return {
                 'role': 'assistant',
                 'content': [
@@ -70,7 +71,7 @@ async def create_jaaz_response(messages: List[Dict[str, Any]], session_id: str =
         # 检查是否有错误
         if result.get('error'):
             error_msg = result['error']
-            print(f"❌ Magic generation error: {error_msg}")
+            logger.error("magic_generation_error", error=error_msg)
             return {
                 'role': 'assistant',
                 'content': [
@@ -118,9 +119,9 @@ async def create_jaaz_response(messages: List[Dict[str, Any]], session_id: str =
 
                 # 保存图片到画布
                 image_url = await save_image_to_canvas(session_id, canvas_id, filename, mime_type, width, height)
-                print(f"✨ 图片已保存到画布: {filename}")
+                logger.info("image_saved_to_canvas", filename=filename)
             except Exception as e:
-                print(f"❌ 保存图片到画布失败: {e}")
+                logger.error("save_image_to_canvas_failed", error=str(e))
 
         return {
             'role': 'assistant',
@@ -141,7 +142,7 @@ async def create_jaaz_response(messages: List[Dict[str, Any]], session_id: str =
                 ]
             }
         else:
-            print(f"❌ 创建魔法回复时出错: {e}")
+            logger.error("create_magic_response_failed", error=str(e))
             return {
                 'role': 'assistant',
                 'content': [

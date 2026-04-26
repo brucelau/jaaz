@@ -7,6 +7,7 @@ from typing import Optional, Dict, Any
 from common import DEFAULT_PORT
 from tools.utils.image_utils import process_input_image
 from ..image_providers.image_base_provider import ImageProviderBase
+from services.log_service import tool_logger as logger
 
 # 导入所有提供商以确保自动注册 (不要删除这些导入)
 from ..image_providers.jaaz_provider import JaazImageProvider
@@ -73,7 +74,7 @@ async def generate_image_with_provider(
             if processed_image:
                 processed_input_images.append(processed_image)
 
-        print(f"Using {len(processed_input_images)} input images for generation")
+        logger.debug("using_input_images", count=len(processed_input_images))
 
     # Prepare metadata with all generation parameters
     metadata: Dict[str, Any] = {

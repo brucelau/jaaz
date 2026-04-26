@@ -9,6 +9,7 @@ from ..utils.image_utils import get_image_info_and_save, generate_image_id
 from services.config_service import FILES_DIR
 from utils.http_client import HttpClient
 from services.config_service import config_service
+from services.log_service import tool_logger as logger
 
 
 class JaazImagesResponse(BaseModel):
@@ -86,20 +87,19 @@ class JaazImageProvider(ImageProviderBase):
             async with HttpClient.create_aiohttp() as session:
                 async with session.post(url, headers=headers, json=search_data) as response:
                     if response.status != 200:
-                        print(f'🦄 Task search failed: HTTP {response.status}')
+                        logger.error("task_search_failed", status=response.status)
                         return None
 
                     json_data = await response.json()
                     if json_data.get('success') and json_data.get('data', {}).get('found'):
                         task = json_data['data']['task']
-                        print(
-                            f'🦄 Found cloud task: {task.get("id")}, status: {task.get("status")}')
+                        logger.info("found_cloud_task", task_id=task.get("id"), status=task.get("status"))
                         return task
 
                     return None
 
         except Exception as e:
-            print(f'🦄 Error searching cloud task: {e}')
+            logger.error("error_searching_cloud_task", error=str(e))
             return None
 
     async def _wait_for_task_completion(self, prompt: str, max_wait_time: int = 300) -> Optional[Dict[str, Any]]:
@@ -124,38 +124,36 @@ class JaazImageProvider(ImageProviderBase):
             if not task:
                 no_task_retry_count += 1
                 if no_task_retry_count <= max_no_task_retries:
-                    print(
-                        f'🦄 No cloud task found, retrying ({no_task_retry_count}/{max_no_task_retries})...')
+                    logger.debug("cloud_task_retry", count=no_task_retry_count, max=max_no_task_retries)
                     await asyncio.sleep(3)
                     continue
                 else:
-                    print('🦄 No cloud task found after 5 retries')
+                    logger.warning("no_cloud_task_found_after_retries")
                     return None
 
             # Reset retry count when task is found
             no_task_retry_count = 0
 
             status = task.get('status')
-            print(f'🦄 Cloud task status: {status}')
+            logger.info("cloud_task_status", status=status)
 
             if status == 'succeeded':
-                print('🦄 Cloud task completed successfully')
+                logger.info("cloud_task_completed")
                 return task
             elif status == 'failed':
-                print('🦄 Cloud task failed')
+                logger.error("cloud_task_failed")
                 return None
             elif status == 'processing':
                 # Check if we've exceeded max wait time
                 elapsed = asyncio.get_event_loop().time() - start_time
                 if elapsed > max_wait_time:
-                    print(
-                        f'🦄 Timeout waiting for cloud task completion ({max_wait_time}s)')
+                    logger.warning("cloud_task_timeout", max_wait_time=max_wait_time)
                     return None
 
-                print('🦄 Cloud task still processing, waiting 2 seconds...')
+                logger.debug("cloud_task_processing")
                 await asyncio.sleep(2)
             else:
-                print(f'🦄 Unknown cloud task status: {status}')
+                logger.warning("unknown_cloud_task_status", status=status)
                 return None
 
     async def _process_cloud_task_result(self, task: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None) -> tuple[str, int, int, str]:
@@ -173,7 +171,7 @@ class JaazImageProvider(ImageProviderBase):
         if not result_url:
             raise Exception('No result_url found in cloud task')
 
-        print(f'🦄 Using cloud task result: {result_url}')
+        logger.info("using_cloud_task_result", url=result_url)
 
         # Download and save the image from cloud result
         image_id = generate_image_id()
@@ -194,19 +192,18 @@ class JaazImageProvider(ImageProviderBase):
             JaazImagesResponse: Jaaz compatible image response object
         """
         async with HttpClient.create_aiohttp() as session:
-            print(
-                f'🦄 Jaaz API request: {url}, model: {data["model"]}, prompt: {data["prompt"]}')
+            logger.debug("jaaz_api_request", url=url, model=data["model"], prompt=f"{data['prompt'][:50]}...")
 
             async with session.post(url, headers=headers, json=data) as response:
                 if response.status != 200:
                     error_text = await response.text()
                     error_msg = f"HTTP {response.status}: {error_text}"
-                    print(f'🦄 Jaaz API error: {error_msg}')
+                    logger.error("jaaz_api_error", error=error_msg)
                     raise Exception(f'Image generation failed: {error_msg}')
 
                 # Parse JSON data
                 json_data = await response.json()
-                print('🦄 Jaaz API response', json_data)
+                logger.debug("jaaz_api_response", response=f"{str(json_data)[:200]}...")
 
                 return JaazImagesResponse(**json_data)
 
@@ -275,7 +272,7 @@ class JaazImageProvider(ImageProviderBase):
                 )
             except Exception as e:
                 if '402' in str(e) or 'Insufficient balance' in str(e):
-                    print(f'🦄 Jaaz cloud balance insufficient, generating placeholder image')
+                    logger.warning("jaaz_balance_insufficient")
                     return await self._generate_placeholder_image(prompt, metadata)
                 raise e
 
@@ -326,27 +323,26 @@ class JaazImageProvider(ImageProviderBase):
                 # For Replicate format, we take the first image as input_image
                 data['input_image'] = input_images[0]
                 if len(input_images) > 1:
-                    print(
-                        "Warning: Replicate format only supports single image input. Using first image.")
+                    logger.warning("replicate_single_image_only", input_count=len(input_images))
 
             res = await self._make_request(url, headers, data)
             return await self._process_response(res, "Jaaz", metadata)
 
         except Exception as e:
-            print(f'Error generating image with Jaaz: {e}')
+            logger.error("error_generating_image_jaaz", error=str(e))
             traceback.print_exc()
 
             # Always attempt cloud task fallback on any error
-            print('🦄 Attempting cloud task fallback...')
+            logger.info("attempting_cloud_task_fallback")
             try:
                 task = await self._wait_for_task_completion(prompt)
                 if task:
-                    print('🦄 Successfully recovered using cloud task')
+                    logger.info("recovered_using_cloud_task")
                     return await self._process_cloud_task_result(task, metadata)
                 else:
-                    print('🦄 No cloud task available for recovery')
+                    logger.warning("no_cloud_task_for_recovery")
             except Exception as fallback_error:
-                print(f'🦄 Cloud task fallback failed: {fallback_error}')
+                logger.error("cloud_task_fallback_failed", error=str(fallback_error))
 
             # If fallback fails, raise original error
             raise e
@@ -421,28 +417,28 @@ class JaazImageProvider(ImageProviderBase):
             # Add input images if provided
             if input_images:
                 data["input_images"] = input_images
-                print(f"Using {len(input_images)} input images for generation")
+                logger.info("using_input_images", count=len(input_images))
 
             res = await self._make_request(url, headers, data)
             return await self._process_response(res, "Jaaz OpenAI", metadata)
 
         except Exception as e:
-            print(f'Error generating image with Jaaz OpenAI: {e}')
+            logger.error("error_generating_image_jaaz_openai", error=str(e))
             traceback.print_exc()
 
             # Always attempt cloud task fallback on any error
-            print('🦄 Attempting cloud task fallback...')
+            logger.info("attempting_cloud_task_fallback")
             try:
                 # For OpenAI models, use the original prompt
                 enhanced_prompt = f"{prompt} Aspect ratio: {aspect_ratio}"
                 task = await self._wait_for_task_completion(enhanced_prompt)
                 if task:
-                    print('🦄 Successfully recovered using cloud task')
+                    logger.info("recovered_using_cloud_task")
                     return await self._process_cloud_task_result(task, metadata)
                 else:
-                    print('🦄 No cloud task available for recovery')
+                    logger.warning("no_cloud_task_for_recovery")
             except Exception as fallback_error:
-                print(f'🦄 Cloud task fallback failed: {fallback_error}')
+                logger.error("cloud_task_fallback_failed", error=str(fallback_error))
 
             # If fallback fails, raise original error
             raise e

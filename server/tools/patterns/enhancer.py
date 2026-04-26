@@ -3,6 +3,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from .database import get_pattern_database
 from .matcher import PatternMatcher, MatchedPattern
+from services.log_service import tool_logger as logger
 
 
 @dataclass
@@ -230,7 +231,7 @@ class PromptEnhancer:
             if response.status_code == 200:
                 data = response.json()
                 result = data["candidates"][0]["content"]["parts"][0]["text"]
-                print(f"[Gemini Generate] Input: {user_input[:50]}... | Output: {result[:80]}...")
+                logger.info("gemini_generate", input=f"{user_input[:50]}...", output=f"{result[:80]}...")
                 return result.strip()
         except Exception:
             pass

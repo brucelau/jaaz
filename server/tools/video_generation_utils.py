@@ -16,6 +16,7 @@ from PIL import Image
 
 
 from services.config_service import FILES_DIR
+from services.log_service import tool_logger as logger
 
 
 def generate_video_file_id():
@@ -34,7 +35,7 @@ async def get_video_info_and_save(
     temp_path = f"{file_path_without_extension}.mp4"
     async with aiofiles.open(temp_path, "wb") as out_file:
         await out_file.write(video_content)
-    print("🎥 Video saved to", temp_path)
+    logger.info("video_saved", path=temp_path)
 
     try:
         media_info = MediaInfo.parse(temp_path)
@@ -42,20 +43,18 @@ async def get_video_info_and_save(
             if track.track_type == "Video":
                 width = track.width
                 height = track.height
-                print(f"Width: {width}, Height: {height}")
+                logger.info("video_dimensions", width=width, height=height)
 
         extension = "mp4"  # 默认使用 mp4，实际情况可以根据 codec_name 灵活判断
 
         # Get mime type
         mime_type = mimetypes.types_map.get(".mp4", "video/mp4")
 
-        print(
-            f"🎥 Video info - width: {width}, height: {height}, mime_type: {mime_type}, extension: {extension}"
-        )
+        logger.info("video_info", width=width, height=height, mime_type=mime_type, extension=extension)
 
         return mime_type, width, height, extension
     except Exception as e:
-        print(f"Error probing video file {temp_path}: {str(e)}")
+        logger.error("video_probe_error", path=temp_path, error=str(e))
         raise e
 
 

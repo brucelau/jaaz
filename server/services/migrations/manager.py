@@ -4,6 +4,7 @@ from services.migrations.v1_initial_schema import V1InitialSchema
 from services.migrations.v2_add_canvases import V2AddCanvases
 from services.migrations.v3_add_comfy_workflow import V3AddComfyWorkflow
 from . import Migration
+from services.log_service import db_logger as logger
 
 # Database version
 CURRENT_VERSION = 3
@@ -37,13 +38,13 @@ class MigrationManager:
         """Apply or rollback migrations to reach target version"""
         if from_version < to_version:
             # Apply migrations forward
-            print('🦄 Applying migrations forward', from_version, '->', to_version)
+            logger.info("applying_migrations", from_version=from_version, to_version=to_version)
             migrations_to_apply = self.get_migrations_to_apply(from_version, to_version)
-            print('🦄 Migrations to apply', migrations_to_apply)
+            logger.debug("migrations_to_apply", migrations=migrations_to_apply)
             for migration in migrations_to_apply:
                 migration_class = migration['migration']
                 migration = migration_class()
-                print(f"Applying migration {migration.version}: {migration.description}")
+                logger.info("applying_migration", version=migration.version, description=migration.description)
                 migration.up(conn)
                 conn.execute("UPDATE db_version SET version = ?", (migration.version,))
         # Do not do rollback migrations

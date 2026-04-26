@@ -1,19 +1,14 @@
-"""
-Video generation core module
-Contains the main orchestration logic for video generation across different providers
-"""
-
 import traceback
 from typing import List, cast, Optional, Any
 from models.config_model import ModelInfo
 from ..video_providers.video_base_provider import get_default_provider, VideoProviderBase
-# Import all providers to ensure automatic registration (don't delete these imports)
-from ..video_providers.volces_provider import VolcesVideoProvider  # type: ignore
+from ..video_providers.volces_provider import VolcesVideoProvider
 from .video_canvas_utils import (
     send_video_start_notification,
     send_video_error_notification,
     process_video_result,
 )
+from services.log_service import tool_logger as logger
 
 
 async def generate_video_with_provider(
@@ -48,11 +43,10 @@ async def generate_video_with_provider(
     model_name = model.split(
         # Some model names contain "/", like "openai/gpt-image-1", need to handle
         '/')[-1]
-    print(f'🛠️ Video Generation {model_name} tool_call_id', tool_call_id)
     ctx = config.get('configurable', {})
     canvas_id = ctx.get('canvas_id', '')
     session_id = ctx.get('session_id', '')
-    print(f'🛠️ canvas_id {canvas_id} session_id {session_id}')
+    logger.info("video_generation_start", model=model_name, tool_call_id=tool_call_id, canvas_id=canvas_id, session_id=session_id)
 
     # Inject the tool call id into the context
     ctx['tool_call_id'] = tool_call_id
@@ -70,7 +64,7 @@ async def generate_video_with_provider(
         # Use get_default_provider which already handles Jaaz prioritization
         provider_name = get_default_provider(model_info_list)
 
-        print(f"🎥 Using provider: {provider_name} for {model_name}")
+        logger.info("video_using_provider", provider=provider_name, model=model_name)
 
         # Create provider instance
         provider_instance = VideoProviderBase.create_provider(provider_name)
@@ -110,7 +104,7 @@ async def generate_video_with_provider(
 
     except Exception as e:
         error_message = str(e)
-        print(f"🎥 Error generating video with {model_name}: {error_message}")
+        logger.error("video_generation_error", model=model_name, error=error_message)
         traceback.print_exc()
 
         # Send error notification

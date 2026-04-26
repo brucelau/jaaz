@@ -16,6 +16,7 @@ from tools.generate_image_by_ideogram3_bal_jaaz import (
 from tools.generate_image_by_ideogram import generate_image_by_ideogram
 from tools.generate_image_by_nano_banana import generate_image_by_nano_banana
 from tools.enhance_airmold_prompt import enhance_airmold_prompt, refine_airmold_prompt, score_airmold_prompt, check_airmold_image
+from services.log_service import tool_logger as logger
 
 # from tools.generate_image_by_flux_1_1_pro import generate_image_by_flux_1_1_pro
 from tools.generate_image_by_flux_kontext_pro_jaaz import (
@@ -239,12 +240,11 @@ class ToolService:
                 "tool_function": check_airmold_image,
             }
         except ImportError as e:
-            print(f"❌ 注册必须工具失败 write_plan: {e}")
+            logger.error("tool_register_failed", tool="write_plan", error=str(e))
 
     def register_tool(self, tool_id: str, tool_info: ToolInfo):
-        """注册单个工具"""
         if tool_id in self.tools:
-            print(f"🔄 TOOL ALREADY REGISTERED: {tool_id}")
+            logger.debug("tool_already_registered", tool_id=tool_id)
             return
 
         self.tools[tool_id] = tool_info
@@ -269,8 +269,8 @@ class ToolService:
             if config_service.app_config.get("comfyui", {}).get("url", ""):
                 await register_comfy_tools()
         except Exception as e:
-            print(f"❌ Failed to initialize tool service: {e}")
-            traceback.print_stack()
+            logger.error("tool_service_init_failed", error=str(e))
+            traceback.print_exc()
 
     def get_tool(self, tool_name: str) -> BaseTool | None:
         tool_info = self.tools.get(tool_name)
@@ -299,9 +299,8 @@ async def register_comfy_tools() -> Dict[str, BaseTool]:
     dynamic_comfy_tools: Dict[str, BaseTool] = {}
     try:
         workflows = await db_service.list_comfy_workflows()
-    except Exception as exc:  # pragma: no cover
-        print("[comfy_dynamic] Failed to list comfy workflows:", exc)
-        traceback.print_stack()
+    except Exception as exc:
+        logger.error("comfy_workflows_list_failed", error=str(exc))
         return {}
 
     for wf in workflows:
@@ -320,10 +319,7 @@ async def register_comfy_tools() -> Dict[str, BaseTool]:
                     "type": "image",
                 },
             )
-        except Exception as exc:  # pragma: no cover
-            print(
-                f"[comfy_dynamic] Failed to create tool for workflow {wf.get('id')}: {exc}"
-            )
-            print(traceback.print_stack())
+        except Exception as exc:
+            logger.error("comfy_tool_create_failed", workflow_id=wf.get('id'), error=str(exc))
 
     return dynamic_comfy_tools

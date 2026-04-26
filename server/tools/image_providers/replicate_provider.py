@@ -6,6 +6,7 @@ from ..utils.image_utils import get_image_info_and_save, generate_image_id
 from services.config_service import FILES_DIR
 from utils.http_client import HttpClient
 from services.config_service import config_service
+from services.log_service import tool_logger as logger
 
 
 class ReplicateImageProvider(ImageProviderBase):
@@ -36,12 +37,11 @@ class ReplicateImageProvider(ImageProviderBase):
             dict[str, Any]: Response data from Replicate API
         """
         async with HttpClient.create_aiohttp() as session:
-            print(
-                f'🦄 Replicate API request: {url}, model: {data["input"]["prompt"]}')
+            logger.info("replicate_request", url=url, model=data["input"]["prompt"])
             async with session.post(url, headers=headers, json=data) as response:
                 # Parse JSON data
                 json_data = await response.json()
-                print('🦄 Replicate API response', json_data)
+                logger.info("replicate_response", response=json_data)
 
                 return json_data
 
@@ -65,7 +65,7 @@ class ReplicateImageProvider(ImageProviderBase):
                     'Replicate image generation failed: no output url found')
 
         image_id = generate_image_id()
-        print('🦄 image generation image_id', image_id)
+        logger.info("replicate_image_id", image_id=image_id)
 
         # Get image dimensions and save
         mime_type, width, height, extension = await get_image_info_and_save(
@@ -112,8 +112,7 @@ class ReplicateImageProvider(ImageProviderBase):
                 # For Replicate format, we take the first image as input_image
                 data['input']['input_image'] = input_images[0]
                 if len(input_images) > 1:
-                    print(
-                        "Warning: Replicate format only supports single image input. Using first image.")
+                    logger.warning("replicate_single_image_only")
 
             # Make request
             res = await self._make_request(url, headers, data)
@@ -122,6 +121,6 @@ class ReplicateImageProvider(ImageProviderBase):
             return await self._process_response(res)
 
         except Exception as e:
-            print('Error generating image with Replicate:', e)
+            logger.error("replicate_error", error=str(e))
             traceback.print_exc()
             raise e

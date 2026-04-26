@@ -1,10 +1,11 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-from langchain_core.tools import tool, InjectedToolCallId  # type: ignore
+from langchain_core.tools import tool, InjectedToolCallId
 from langchain_core.runnables import RunnableConfig
 from services.jaaz_service import JaazService
 from tools.video_generation.video_canvas_utils import send_video_start_notification, process_video_result
 from .utils.image_utils import process_input_image
+from services.log_service import tool_logger as logger
 
 
 class GenerateVideoByKlingV2InputSchema(BaseModel):
@@ -49,11 +50,10 @@ async def generate_video_by_kling_v2_jaaz(
     """
     Generate a video using Kling V2.1 model via Jaaz service
     """
-    print(f'🛠️ Kling Video Generation tool_call_id: {tool_call_id}')
     ctx = config.get('configurable', {})
     canvas_id = ctx.get('canvas_id', '')
     session_id = ctx.get('session_id', '')
-    print(f'🛠️ canvas_id {canvas_id} session_id {session_id}')
+    logger.info("kling_start", tool_call_id=tool_call_id, canvas_id=canvas_id, session_id=session_id)
 
     # Inject the tool call id into the context
     ctx['tool_call_id'] = tool_call_id
@@ -77,8 +77,7 @@ async def generate_video_by_kling_v2_jaaz(
             raise ValueError(
                 f"Failed to process input image: {first_image}. Please check if the image exists and is valid.")
 
-        print(
-            f"Using first input image as start image for Kling video generation: {first_image}")
+        logger.debug("kling_using_input_image", image=first_image)
 
         # Create Jaaz service and generate video
         jaaz_service = JaazService()
@@ -105,7 +104,7 @@ async def generate_video_by_kling_v2_jaaz(
         )
 
     except Exception as e:
-        print(f"Error in Kling video generation: {e}")
+        logger.error("kling_error", error=str(e))
         raise e
 
 

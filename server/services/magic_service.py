@@ -1,15 +1,11 @@
-# services/magic_service.py
-
-# Import necessary modules
 import asyncio
 import json
 from typing import Dict, Any, List
-
-# Import service modules
 from services.db_service import db_service
 from services.OpenAIAgents_service import create_jaaz_response
-from services.websocket_service import send_to_websocket  # type: ignore
+from services.websocket_service import send_to_websocket
 from services.stream_service import add_stream_task, remove_stream_task
+from services.log_service import chat_logger as logger
 
 
 async def handle_magic(data: Dict[str, Any]) -> None:
@@ -62,14 +58,14 @@ async def handle_magic(data: Dict[str, Any]) -> None:
         # Await completion of the magic generation task
         await task
     except asyncio.exceptions.CancelledError:
-        print(f"🛑Magic generation session {session_id} cancelled")
+        logger.warning("magic_session_cancelled", session_id=session_id)
     finally:
         # Always remove the task from stream_tasks after completion/cancellation
         remove_stream_task(session_id)
         # Notify frontend WebSocket that magic generation is done
         await send_to_websocket(session_id, {'type': 'done'})
 
-    print('✨ magic_service 处理完成')
+    logger.info("magic_service_done")
 
 
 async def _process_magic_generation(

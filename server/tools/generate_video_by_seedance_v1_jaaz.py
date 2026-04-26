@@ -1,10 +1,11 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-from langchain_core.tools import tool, InjectedToolCallId  # type: ignore
+from langchain_core.tools import tool, InjectedToolCallId
 from langchain_core.runnables import RunnableConfig
 from services.jaaz_service import JaazService
 from tools.video_generation.video_canvas_utils import send_video_start_notification, process_video_result
 from .utils.image_utils import process_input_image
+from services.log_service import tool_logger as logger
 
 
 class GenerateVideoBySeedanceV1InputSchema(BaseModel):
@@ -50,11 +51,10 @@ async def generate_video_by_seedance_v1_jaaz(
     """
     Generate a video using Seedance V1 model via Jaaz service
     """
-    print(f'🛠️ Seedance Video Generation tool_call_id: {tool_call_id}')
     ctx = config.get('configurable', {})
     canvas_id = ctx.get('canvas_id', '')
     session_id = ctx.get('session_id', '')
-    print(f'🛠️ canvas_id {canvas_id} session_id {session_id}')
+    logger.info("seedance_start", tool_call_id=tool_call_id, canvas_id=canvas_id, session_id=session_id)
 
     # Inject the tool call id into the context
     ctx['tool_call_id'] = tool_call_id
@@ -74,7 +74,7 @@ async def generate_video_by_seedance_v1_jaaz(
             processed_image = await process_input_image(first_image)
             if processed_image:
                 processed_input_images = [processed_image]
-                print(f"Using input image for video generation: {first_image}")
+                logger.debug("seedance_using_input_image", image=first_image)
             else:
                 raise ValueError(
                     f"Failed to process input image: {first_image}. Please check if the image exists and is valid.")
@@ -104,7 +104,7 @@ async def generate_video_by_seedance_v1_jaaz(
         )
 
     except Exception as e:
-        print(f"Error in Seedance video generation: {e}")
+        logger.error("seedance_error", error=str(e))
         raise e
 
 

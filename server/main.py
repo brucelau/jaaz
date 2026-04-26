@@ -1,12 +1,14 @@
 import os
 import sys
 import io
-# Ensure stdout and stderr use utf-8 encoding to prevent emoji logs from crashing python server
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
-print('Importing websocket_router')
-from routers.websocket_router import *  # DO NOT DELETE THIS LINE, OTHERWISE, WEBSOCKET WILL NOT WORK
-print('Importing routers')
+
+from services.log_service import app_logger as logger
+
+logger.info("startup", msg="importing_websocket_router")
+from routers.websocket_router import *
+logger.info("startup", msg="importing_routers")
 from routers import config_router, image_router, root_router, workspace, canvas, ssl_test, chat_router, settings, tool_confirmation
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -15,47 +17,29 @@ import argparse
 from contextlib import asynccontextmanager
 from starlette.types import Scope
 from starlette.responses import Response
-import socketio # type: ignore
-print('Importing websocket_state')
+import socketio
+logger.info("startup", msg="importing_websocket_state")
 from services.websocket_state import sio
-print('Importing websocket_service')
+logger.info("startup", msg="importing_websocket_service")
 from services.websocket_service import broadcast_init_done
-print('Importing config_service')
+logger.info("startup", msg="importing_config_service")
 from services.config_service import config_service
-print('Importing tool_service')
+logger.info("startup", msg="importing_tool_service")
 from services.tool_service import tool_service
 
 async def initialize():
-    print('Initializing config_service')
+    logger.info("startup", msg="initializing_config_service")
     await config_service.initialize()
-    print('Initializing broadcast_init_done')
+    logger.info("startup", msg="initializing_broadcast_init_done")
     await broadcast_init_done()
 
 root_dir = os.path.dirname(__file__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # onstartup
-    # TODO: Check if there will be racing conditions when user send chat request but tools and models are not initialized yet.
     await initialize()
     await tool_service.initialize()
     yield
-    # onshutdown
-
-print('Creating FastAPI app')
-app = FastAPI(lifespan=lifespan)
-
-# Include routers
-print('Including routers')
-app.include_router(config_router.router)
-app.include_router(settings.router)
-app.include_router(root_router.router)
-app.include_router(canvas.router)
-app.include_router(workspace.router)
-app.include_router(image_router.router)
-app.include_router(ssl_test.router)
-app.include_router(chat_router.router)
-app.include_router(tool_confirmation.router)
 
 # Mount the React build directory
 react_build_dir = os.environ.get('UI_DIST_DIR', os.path.join(
@@ -96,11 +80,10 @@ async def serve_png_files(filename: str):
         return response
     return Response(status_code=404)
 
-print('Creating socketio app')
+logger.info("startup", msg="creating_socketio_app")
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path='/socket.io')
 
 if __name__ == "__main__":
-    # bypass localhost request for proxy, fix ollama proxy issue
     _bypass = {"127.0.0.1", "localhost", "::1"}
     current = set(os.environ.get("no_proxy", "").split(",")) | set(
         os.environ.get("NO_PROXY", "").split(","))
@@ -112,6 +95,6 @@ if __name__ == "__main__":
                         help='Port to run the server on')
     args = parser.parse_args()
     import uvicorn
-    print("🌟Starting server, UI_DIST_DIR:", os.environ.get('UI_DIST_DIR'))
+    logger.info("startup", msg="starting_server", port=args.port, ui_dist_dir=os.environ.get('UI_DIST_DIR'))
 
     uvicorn.run(socket_app, host="127.0.0.1", port=args.port)

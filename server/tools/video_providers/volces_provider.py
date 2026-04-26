@@ -6,6 +6,7 @@ from typing import Optional, Dict, Any, List
 from .video_base_provider import VideoProviderBase
 from utils.http_client import HttpClient
 from services.config_service import config_service
+from services.log_service import tool_logger as logger
 
 
 class VolcesVideoProvider(VideoProviderBase, provider_name="volces"):
@@ -94,8 +95,7 @@ class VolcesVideoProvider(VideoProviderBase, provider_name="volces"):
 
         async with HttpClient.create_aiohttp() as session:
             while status not in ("succeeded", "failed", "cancelled"):
-                print(
-                    f"🎥 Polling Volces generation {task_id}, current status: {status} ...")
+                logger.info("volces_polling", task_id=task_id, status=status)
                 await asyncio.sleep(3)  # Wait 3 seconds between polls
 
                 async with session.get(polling_url, headers=headers) as poll_response:
@@ -155,8 +155,7 @@ class VolcesVideoProvider(VideoProviderBase, provider_name="volces"):
                 **kwargs
             )
 
-            print(
-                f"🎥 Starting Volces video generation")
+            logger.info("volces_starting_generation")
 
             # Make API request to create task
             async with HttpClient.create_aiohttp() as session:
@@ -175,21 +174,19 @@ class VolcesVideoProvider(VideoProviderBase, provider_name="volces"):
                     task_id = result.get("id", None)
 
                 if not task_id:
-                    print("🎥 Failed to create Volces video generation task:", result)
+                    logger.error("volces_task_creation_failed", result=result)
                     raise Exception(
                         "Volces video generation task creation failed")
 
-                print(
-                    f"🎥 Volces video generation task created, task_id: {task_id}")
+                logger.info("volces_task_created", task_id=task_id)
 
             # Poll for task completion
             video_url = await self._poll_task_status(task_id, headers)
-            print(
-                f"🎥 Volces video generation completed, video URL: {video_url}")
+            logger.info("volces_completed", video_url=video_url)
 
             return video_url
 
         except Exception as e:
-            print(f"🎥 Error generating video with Volces: {str(e)}")
+            logger.error("volces_error", error=str(e))
             traceback.print_exc()
             raise e
