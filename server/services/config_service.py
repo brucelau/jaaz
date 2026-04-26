@@ -26,6 +26,13 @@ class ProviderConfig(TypedDict, total=False):
 AppConfig = Dict[str, ProviderConfig]
 
 
+def _env_models(key: str, default: str) -> Dict[str, ModelConfig]:
+    val = os.getenv(key, default)
+    if not val:
+        return {}
+    return {m.strip(): {"type": "text"} for m in val.split(",") if m.strip()}
+
+
 DEFAULT_PROVIDERS_CONFIG: AppConfig = {
     'comfyui': {
         'models': {},
@@ -33,30 +40,20 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
         'api_key': '',
     },
     'minimax': {
-        'models': {
-            'MiniMax-M2.5-highspeed': {'type': 'text'},
-            'MiniMax-M2.7-highspeed': {'type': 'text'},
-        },
-        'url': 'https://api.minimax.io/v1/',
+        'models': _env_models("MINIMAX_MODELS", "MiniMax-M2.5-highspeed,MiniMax-M2.7-highspeed"),
+        'url': os.getenv("MINIMAX_URL", 'https://api.minimax.io/v1/'),
         'api_key': '',
         'max_tokens': 8192,
     },
     'openai': {
-        'models': {
-            'gpt-4o': {'type': 'text'},
-            'gpt-4o-mini': {'type': 'text'},
-        },
-        'url': 'https://api.openai.com/v1/',
+        'models': _env_models("OPENAI_MODELS", "gpt-4o,gpt-4o-mini"),
+        'url': os.getenv("OPENAI_URL", 'https://api.openai.com/v1/'),
         'api_key': '',
         'max_tokens': 8192,
     },
     'gemini': {
-        'models': {
-            'gemini-2.5-pro': {'type': 'text'},
-            'gemini-2.5-flash': {'type': 'text'},
-            'gemini-2.0-flash': {'type': 'text'},
-        },
-        'url': 'https://generativelanguage.googleapis.com/',
+        'models': _env_models("GEMINI_MODELS", "gemini-2.5-pro,gemini-2.5-flash,gemini-2.0-flash"),
+        'url': os.getenv("GEMINI_URL", 'https://generativelanguage.googleapis.com/'),
         'api_key': '',
         'max_tokens': 8192,
     },

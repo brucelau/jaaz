@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict
 from pathlib import Path
 from dataclasses import dataclass, field
+import os
 from .database import get_pattern_database
 from .matcher import PatternMatcher, MatchedPattern
 from services.log_service import tool_logger as logger
@@ -28,6 +29,7 @@ class EnhancementResult:
 class PromptEnhancer:
     WEAK_THRESHOLD = 0.3
     STRONG_THRESHOLD = 0.7
+    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash")
 
     DEFAULT_TEMPLATE_PATH = Path(__file__).parent / "prompts" / "enhancer_template.md"
 
@@ -220,7 +222,7 @@ class PromptEnhancer:
             if not api_key:
                 return self._enhance_with_templates(user_input, matched, strong_patterns, keywords)
 
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.GEMINI_MODEL}:generateContent?key={api_key}"
 
             payload = {
                 "contents": [{"parts": [{"text": prompt}]}],
@@ -278,7 +280,7 @@ class PromptEnhancer:
                 enhanced = self._enhance_with_templates(user_input, matched, strong_patterns, keywords)
                 return [EnhancementCandidate(prompt=enhanced, reason="无 API Key")]
 
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.GEMINI_MODEL}:generateContent?key={api_key}"
 
             payload = {
                 "contents": [{"parts": [{"text": prompt}]}],

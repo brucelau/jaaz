@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 import re
+import os
 from services.log_service import tool_logger as logger
 
 
@@ -46,8 +47,9 @@ class AirMoldScorer:
         "配色", "色系", "Pantone", "色彩", "颜色", "色调"
     ]
 
-    PASS_THRESHOLD = 3.5
-    SELENE_URL = "http://100.75.202.111:8080/v1/chat/completions"
+    PASS_THRESHOLD = float(os.getenv("PASS_THRESHOLD", "3.5"))
+    SELENE_URL = os.getenv("SELENE_URL", "http://100.75.202.111:8080/v1/chat/completions")
+    SELENE_TIMEOUT = int(os.getenv("SELENE_TIMEOUT", "60"))
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key
@@ -147,7 +149,7 @@ class AirMoldScorer:
                     "max_tokens": 300,
                     "temperature": 0.3
                 },
-                timeout=60
+                timeout=self.SELENE_TIMEOUT
             )
             if resp.status_code == 200:
                 result_text = resp.json()["choices"][0]["message"]["content"]
