@@ -7,15 +7,15 @@ class TestToolConfirmationManagerImports:
     """Test tool_confirmation_manager imports"""
 
     def test_tool_confirmation_manager_exists(self):
-        from services.tool_confirmation_manager import ToolConfirmationManager
+        from agents.tool_confirmation_manager import ToolConfirmationManager
         assert ToolConfirmationManager is not None
 
     def test_tool_confirmation_request_exists(self):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
         assert ToolConfirmationRequest is not None
 
     def test_global_instance_exists(self):
-        from services.tool_confirmation_manager import tool_confirmation_manager
+        from agents.tool_confirmation_manager import tool_confirmation_manager
         assert tool_confirmation_manager is not None
 
 
@@ -23,7 +23,7 @@ class TestToolConfirmationRequest:
     """Test ToolConfirmationRequest dataclass"""
 
     def test_creation_with_required_fields(self):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
         request = ToolConfirmationRequest(
             tool_call_id='call_123',
             session_id='session_456',
@@ -37,7 +37,7 @@ class TestToolConfirmationRequest:
         assert request.confirmed is None
 
     def test_creation_with_optional_confirmed(self):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
         request = ToolConfirmationRequest(
             tool_call_id='call_123',
             session_id='session_456',
@@ -53,7 +53,7 @@ class TestToolConfirmationManagerInit:
     """Test ToolConfirmationManager initialization"""
 
     def test_initializes_with_empty_pending(self):
-        from services.tool_confirmation_manager import ToolConfirmationManager
+        from agents.tool_confirmation_manager import ToolConfirmationManager
         manager = ToolConfirmationManager()
         assert manager.pending_confirmations == {}
         assert manager.confirmation_timeout == timedelta(minutes=5)
@@ -64,7 +64,7 @@ class TestRequestConfirmation:
 
     @pytest.fixture
     def manager(self):
-        from services.tool_confirmation_manager import ToolConfirmationManager
+        from agents.tool_confirmation_manager import ToolConfirmationManager
         return ToolConfirmationManager()
 
     @pytest.mark.asyncio
@@ -118,11 +118,11 @@ class TestConfirmTool:
 
     @pytest.fixture
     def manager(self):
-        from services.tool_confirmation_manager import ToolConfirmationManager
+        from agents.tool_confirmation_manager import ToolConfirmationManager
         return ToolConfirmationManager()
 
     def test_returns_true_when_request_exists(self, manager):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
         manager.pending_confirmations['call_1'] = ToolConfirmationRequest(
             tool_call_id='call_1',
             session_id='session_1',
@@ -145,11 +145,11 @@ class TestCancelConfirmation:
 
     @pytest.fixture
     def manager(self):
-        from services.tool_confirmation_manager import ToolConfirmationManager
+        from agents.tool_confirmation_manager import ToolConfirmationManager
         return ToolConfirmationManager()
 
     def test_returns_true_when_request_exists(self, manager):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
         manager.pending_confirmations['call_1'] = ToolConfirmationRequest(
             tool_call_id='call_1',
             session_id='session_1',
@@ -172,11 +172,11 @@ class TestGetPendingRequest:
 
     @pytest.fixture
     def manager(self):
-        from services.tool_confirmation_manager import ToolConfirmationManager
+        from agents.tool_confirmation_manager import ToolConfirmationManager
         return ToolConfirmationManager()
 
     def test_returns_request_when_exists(self, manager):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
         request = ToolConfirmationRequest(
             tool_call_id='call_1',
             session_id='session_1',
@@ -199,11 +199,11 @@ class TestCleanupExpired:
 
     @pytest.fixture
     def manager(self):
-        from services.tool_confirmation_manager import ToolConfirmationManager
+        from agents.tool_confirmation_manager import ToolConfirmationManager
         return ToolConfirmationManager()
 
     def test_removes_expired_requests(self, manager):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
 
         # Add an expired request
         manager.pending_confirmations['expired_call'] = ToolConfirmationRequest(
@@ -229,7 +229,7 @@ class TestCleanupExpired:
         assert 'valid_call' in manager.pending_confirmations
 
     def test_does_nothing_when_all_valid(self, manager):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
 
         manager.pending_confirmations['call_1'] = ToolConfirmationRequest(
             tool_call_id='call_1',
@@ -249,12 +249,12 @@ class TestWaitForConfirmation:
 
     @pytest.fixture
     def manager(self):
-        from services.tool_confirmation_manager import ToolConfirmationManager
+        from agents.tool_confirmation_manager import ToolConfirmationManager
         return ToolConfirmationManager()
 
     @pytest.mark.asyncio
     async def test_returns_when_confirmed(self, manager):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
 
         manager.pending_confirmations['call_1'] = ToolConfirmationRequest(
             tool_call_id='call_1',
@@ -270,7 +270,7 @@ class TestWaitForConfirmation:
 
     @pytest.mark.asyncio
     async def test_continues_until_confirmed(self, manager):
-        from services.tool_confirmation_manager import ToolConfirmationRequest
+        from agents.tool_confirmation_manager import ToolConfirmationRequest
 
         manager.pending_confirmations['call_1'] = ToolConfirmationRequest(
             tool_call_id='call_1',

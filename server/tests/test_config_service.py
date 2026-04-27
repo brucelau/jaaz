@@ -2,7 +2,7 @@ import pytest
 import os
 import tempfile
 import asyncio
-from services.config_service import ConfigService, _env_models, DEFAULT_PROVIDERS_CONFIG, AppConfig
+from web.services.config_service import ConfigService, _env_models, DEFAULT_PROVIDERS_CONFIG, AppConfig
 
 
 class TestEnvModels:

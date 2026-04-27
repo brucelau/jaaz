@@ -28,7 +28,7 @@ import httpx
 from typing import Optional, Dict, Any, AsyncGenerator, Generator
 from contextlib import asynccontextmanager, contextmanager
 import aiohttp
-from services.log_service import tool_logger as logger
+from web.services.log_service import tool_logger as logger
 
 
 class HttpClient:

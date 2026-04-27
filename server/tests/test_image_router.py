@@ -10,23 +10,23 @@ class TestImageRouterImports:
     """Test image_router imports"""
 
     def test_router_exists(self):
-        from routers.image_router import router
+        from web.routers.image_router import router
         assert router is not None
 
     def test_upload_image_exists(self):
-        from routers.image_router import router, upload_image
+        from web.routers.image_router import router, upload_image
         assert upload_image is not None
 
     def test_get_file_exists(self):
-        from routers.image_router import router, get_file
+        from web.routers.image_router import router, get_file
         assert get_file is not None
 
     def test_get_object_info_exists(self):
-        from routers.image_router import router, get_object_info
+        from web.routers.image_router import router, get_object_info
         assert get_object_info is not None
 
     def test_compress_image_exists(self):
-        from routers.image_router import compress_image
+        from web.routers.image_router import compress_image
         assert compress_image is not None
 
 
@@ -35,7 +35,7 @@ class TestUploadImageEndpoint:
 
     @pytest.fixture
     def app(self):
-        from routers.image_router import router
+        from web.routers.image_router import router
         app = FastAPI()
         app.include_router(router)
         return app
@@ -53,8 +53,8 @@ class TestUploadImageEndpoint:
         assert response.status_code == 422  # Validation error
 
     def test_upload_image_returns_file_info(self, client):
-        with patch('routers.image_router.FILES_DIR', '/tmp/test_files'), \
-             patch('routers.image_router.generate_file_id', return_value='test_id_123'):
+        with patch('web.routers.image_router.FILES_DIR', '/tmp/test_files'), \
+             patch('web.routers.image_router.generate_file_id', return_value='test_id_123'):
             # Create a minimal valid image
             from PIL import Image
             img = Image.new('RGB', (100, 100), color='red')
@@ -62,7 +62,7 @@ class TestUploadImageEndpoint:
             img.save(img_bytes, format='JPEG')
             img_bytes.seek(0)
 
-            with patch('routers.image_router.run_in_threadpool', new_callable=AsyncMock):
+            with patch('web.routers.image_router.run_in_threadpool', new_callable=AsyncMock):
                 response = client.post(
                     '/api/upload_image',
                     files={'file': ('test.jpg', img_bytes, 'image/jpeg')}
@@ -80,7 +80,7 @@ class TestGetFileEndpoint:
 
     @pytest.fixture
     def app(self):
-        from routers.image_router import router
+        from web.routers.image_router import router
         app = FastAPI()
         app.include_router(router)
         return app
@@ -90,14 +90,14 @@ class TestGetFileEndpoint:
         return TestClient(app)
 
     def test_get_file_returns_transparent_png_when_not_found(self, client):
-        with patch('routers.image_router.os.path.exists', return_value=False):
+        with patch('web.routers.image_router.os.path.exists', return_value=False):
             response = client.get('/api/file/nonexistent_file.jpg')
             assert response.status_code == 200
             assert response.headers['content-type'] == 'image/png'
 
     def test_get_file_returns_file_response(self, client):
-        with patch('routers.image_router.os.path.exists', return_value=True), \
-             patch('routers.image_router.FileResponse') as mock_response:
+        with patch('web.routers.image_router.os.path.exists', return_value=True), \
+             patch('web.routers.image_router.FileResponse') as mock_response:
             mock_response.return_value = {"file": "content"}
             response = client.get('/api/file/existing_file.jpg')
             assert response.status_code == 200
@@ -108,7 +108,7 @@ class TestGetObjectInfoEndpoint:
 
     @pytest.fixture
     def app(self):
-        from routers.image_router import router
+        from web.routers.image_router import router
         app = FastAPI()
         app.include_router(router)
         return app
@@ -134,7 +134,7 @@ class TestGetObjectInfoEndpoint:
         async def mock_create(*args, **kwargs):
             yield mock_client
 
-        with patch('routers.image_router.HttpClient.create', new=mock_create):
+        with patch('web.routers.image_router.HttpClient.create', new=mock_create):
             response = client.post(
                 '/api/comfyui/object_info',
                 json={'url': 'http://localhost:8188'}
@@ -151,7 +151,7 @@ class TestGetObjectInfoEndpoint:
             mock_client.get = AsyncMock(side_effect=ConnectError("Connection refused"))
             yield mock_client
 
-        with patch('routers.image_router.HttpClient.create', new=mock_create):
+        with patch('web.routers.image_router.HttpClient.create', new=mock_create):
             response = client.post(
                 '/api/comfyui/object_info',
                 json={'url': 'http://localhost:8188'}
@@ -164,7 +164,7 @@ class TestCompressImage:
     """Test compress_image helper function"""
 
     def test_compress_image_returns_bytes(self):
-        from routers.image_router import compress_image
+        from web.routers.image_router import compress_image
         from PIL import Image
 
         img = Image.new('RGB', (100, 100), color='red')
@@ -172,7 +172,7 @@ class TestCompressImage:
         assert isinstance(result, bytes)
 
     def test_compress_image_handles_large_image(self):
-        from routers.image_router import compress_image
+        from web.routers.image_router import compress_image
         from PIL import Image
 
         # Create a large image
@@ -181,7 +181,7 @@ class TestCompressImage:
         assert isinstance(result, bytes)
 
     def test_compress_image_preserves_aspect_ratio(self):
-        from routers.image_router import compress_image
+        from web.routers.image_router import compress_image
         from PIL import Image
 
         # Create a non-square image
@@ -190,7 +190,7 @@ class TestCompressImage:
         assert isinstance(result, bytes)
 
     def test_compress_image_returns_jpeg_format(self):
-        from routers.image_router import compress_image
+        from web.routers.image_router import compress_image
         from PIL import Image
         from io import BytesIO
 

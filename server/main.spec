@@ -6,7 +6,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[(certifi.where(), 'certifi'), ('asset', 'asset')],
+    datas=[(certifi.where(), 'certifi'), ('agents/workflow', 'agents/workflow')],
     hiddenimports=['certifi'],
     hookspath=[],
     hooksconfig={},

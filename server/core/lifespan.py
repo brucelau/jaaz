@@ -3,10 +3,10 @@ import io
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from services.log_service import app_logger as logger
-from services.config_service import config_service
-from services.tool_service import tool_service
-from ws_manager.emitter import broadcast_init_done
+from web.services.log_service import app_logger as logger
+from web.services.config_service import config_service
+from web.services.tool_service import tool_service
+from web.websocket.emitter import broadcast_init_done
 
 
 async def initialize():

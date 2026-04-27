@@ -2,7 +2,7 @@ import pytest
 import os
 import tempfile
 import asyncio
-from db.db_service import DatabaseService
+from database.db_service import DatabaseService
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def temp_db():
 class TestDatabaseIndexes:
     @pytest.mark.asyncio
     async def test_chat_sessions_canvas_id_index_exists(self, temp_db):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         old_pool = db_mod._db_pool
         db_mod.DB_PATH = temp_db
@@ -43,7 +43,7 @@ class TestDatabaseIndexes:
 
     @pytest.mark.asyncio
     async def test_chat_messages_session_id_index_exists(self, temp_db):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         old_pool = db_mod._db_pool
         db_mod.DB_PATH = temp_db
@@ -68,7 +68,7 @@ class TestDatabaseIndexes:
 
     @pytest.mark.asyncio
     async def test_canvases_updated_at_index_exists(self, temp_db):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         old_pool = db_mod._db_pool
         db_mod.DB_PATH = temp_db

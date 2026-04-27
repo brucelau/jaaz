@@ -6,23 +6,23 @@ from contextlib import asynccontextmanager
 
 class TestJaazServiceInit:
     def test_jaaz_service_requires_api_url(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': '', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             with pytest.raises(ValueError, match="Jaaz API URL is not configured"):
                 JaazService()
 
     def test_jaaz_service_requires_api_token(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': ''}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             with pytest.raises(ValueError, match="Jaaz API token is not configured"):
                 JaazService()
 
     def test_jaaz_service_appends_api_v1(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             service = JaazService()
             assert service.api_url == 'https://api.test.com/api/v1'
 
@@ -30,9 +30,9 @@ class TestJaazServiceInit:
 class TestJaazServiceHelpers:
     @pytest.fixture
     def jaaz_service(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             return JaazService()
 
     def test_is_configured_returns_true_when_valid(self, jaaz_service):
@@ -79,9 +79,9 @@ def make_mock_create_aiohttp(mock_session):
 class TestCreateMagicTask:
     @pytest.fixture
     def jaaz_service(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             return JaazService()
 
     @pytest.mark.asyncio
@@ -100,7 +100,7 @@ class TestCreateMagicTask:
         mock_session = make_mock_session(post_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             result = await jaaz_service.create_magic_task("data:image/png;base64,abc123")
             assert result == "task_123"
 
@@ -110,7 +110,7 @@ class TestCreateMagicTask:
         mock_session = make_mock_session(post_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             result = await jaaz_service.create_magic_task("data:image/png;base64,abc123")
             assert result == ""
 
@@ -118,9 +118,9 @@ class TestCreateMagicTask:
 class TestCreateVideoTask:
     @pytest.fixture
     def jaaz_service(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             return JaazService()
 
     @pytest.mark.asyncio
@@ -129,7 +129,7 @@ class TestCreateVideoTask:
         mock_session = make_mock_session(post_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             with pytest.raises(Exception, match="Failed to create video task"):
                 await jaaz_service.create_video_task(prompt="test", model="seedance")
 
@@ -139,7 +139,7 @@ class TestCreateVideoTask:
         mock_session = make_mock_session(post_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             with pytest.raises(Exception, match="No task_id in response"):
                 await jaaz_service.create_video_task(prompt="test", model="seedance")
 
@@ -147,9 +147,9 @@ class TestCreateVideoTask:
 class TestPollForTaskCompletion:
     @pytest.fixture
     def jaaz_service(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             return JaazService()
 
     @pytest.mark.asyncio
@@ -164,7 +164,7 @@ class TestPollForTaskCompletion:
         mock_session = make_mock_session(get_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             result = await jaaz_service.poll_for_task_completion('task_123', max_attempts=1, interval=0.01)
             assert result['status'] == 'succeeded'
 
@@ -180,7 +180,7 @@ class TestPollForTaskCompletion:
         mock_session = make_mock_session(get_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             with pytest.raises(Exception, match="Task failed"):
                 await jaaz_service.poll_for_task_completion('task_123', max_attempts=1, interval=0.01)
 
@@ -196,7 +196,7 @@ class TestPollForTaskCompletion:
         mock_session = make_mock_session(get_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             with pytest.raises(Exception, match="Task was cancelled"):
                 await jaaz_service.poll_for_task_completion('task_123', max_attempts=1, interval=0.01)
 
@@ -204,9 +204,9 @@ class TestPollForTaskCompletion:
 class TestGenerateMagicImage:
     @pytest.fixture
     def jaaz_service(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             return JaazService()
 
     @pytest.mark.asyncio
@@ -226,9 +226,9 @@ class TestGenerateMagicImage:
 class TestGenerateVideoBySeedance:
     @pytest.fixture
     def jaaz_service(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             return JaazService()
 
     @pytest.mark.asyncio
@@ -237,7 +237,7 @@ class TestGenerateVideoBySeedance:
         mock_session = make_mock_session(post_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             with pytest.raises(Exception, match="Failed to create Seedance video task"):
                 await jaaz_service.generate_video_by_seedance(prompt="test video", model="seedance")
 
@@ -245,9 +245,9 @@ class TestGenerateVideoBySeedance:
 class TestCreateMidjourneyTask:
     @pytest.fixture
     def jaaz_service(self):
-        with patch('services.jaaz_service.config_service') as mock_config:
+        with patch('web.services.jaaz_service.config_service') as mock_config:
             mock_config.app_config = {'jaaz': {'url': 'https://api.test.com', 'api_key': 'test_key'}}
-            from services.jaaz_service import JaazService
+            from web.services.jaaz_service import JaazService
             return JaazService()
 
     @pytest.mark.asyncio
@@ -256,7 +256,7 @@ class TestCreateMidjourneyTask:
         mock_session = make_mock_session(post_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             result = await jaaz_service.create_midjourney_task(prompt="test image")
             assert result == "mj_task_456"
 
@@ -266,6 +266,6 @@ class TestCreateMidjourneyTask:
         mock_session = make_mock_session(post_response=mock_response)
         mock_create = make_mock_create_aiohttp(mock_session)
 
-        with patch('services.jaaz_service.HttpClient.create_aiohttp', mock_create):
+        with patch('web.services.jaaz_service.HttpClient.create_aiohttp', mock_create):
             with pytest.raises(Exception, match="Failed to create Midjourney task"):
                 await jaaz_service.create_midjourney_task(prompt="test image")

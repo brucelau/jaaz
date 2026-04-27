@@ -4,7 +4,7 @@ import pytest
 class TestFindNextBestElementPosition:
     @pytest.mark.asyncio
     async def test_returns_zero_zero_when_no_elements(self):
-        from utils.canvas import find_next_best_element_position
+        from agents.tools.utils.canvas import find_next_best_element_position
         canvas_data = {"elements": []}
         x, y = await find_next_best_element_position(canvas_data)
         assert x == 0
@@ -12,7 +12,7 @@ class TestFindNextBestElementPosition:
 
     @pytest.mark.asyncio
     async def test_returns_zero_zero_when_no_media_elements(self):
-        from utils.canvas import find_next_best_element_position
+        from agents.tools.utils.canvas import find_next_best_element_position
         canvas_data = {"elements": [{"type": "text", "x": 10, "y": 10}]}
         x, y = await find_next_best_element_position(canvas_data)
         assert x == 0
@@ -20,7 +20,7 @@ class TestFindNextBestElementPosition:
 
     @pytest.mark.asyncio
     async def test_single_element_returns_next_to_it(self):
-        from utils.canvas import find_next_best_element_position
+        from agents.tools.utils.canvas import find_next_best_element_position
         canvas_data = {
             "elements": [
                 {"type": "image", "x": 0, "y": 0, "width": 100, "height": 100, "isDeleted": False}
@@ -32,7 +32,7 @@ class TestFindNextBestElementPosition:
 
     @pytest.mark.asyncio
     async def test_new_row_when_row_full(self):
-        from utils.canvas import find_next_best_element_position
+        from agents.tools.utils.canvas import find_next_best_element_position
         canvas_data = {
             "elements": [
                 {"type": "image", "x": 0, "y": 0, "width": 100, "height": 100, "isDeleted": False},
@@ -47,7 +47,7 @@ class TestFindNextBestElementPosition:
 
     @pytest.mark.asyncio
     async def test_skips_deleted_elements(self):
-        from utils.canvas import find_next_best_element_position
+        from agents.tools.utils.canvas import find_next_best_element_position
         canvas_data = {
             "elements": [
                 {"type": "image", "x": 0, "y": 0, "width": 100, "height": 100, "isDeleted": True}
@@ -59,7 +59,7 @@ class TestFindNextBestElementPosition:
 
     @pytest.mark.asyncio
     async def test_skips_non_media_elements(self):
-        from utils.canvas import find_next_best_element_position
+        from agents.tools.utils.canvas import find_next_best_element_position
         canvas_data = {
             "elements": [
                 {"type": "text", "x": 0, "y": 0, "width": 100, "height": 100},

@@ -2,7 +2,7 @@ import pytest
 import asyncio
 import tempfile
 import os
-from db.db_service import DatabaseService, ConnectionPool, get_db_pool, DB_PATH
+from database.db_service import DatabaseService, ConnectionPool, get_db_pool, DB_PATH
 
 
 @pytest.fixture
@@ -90,7 +90,7 @@ class TestConnectionPool:
     async def test_get_db_pool_returns_same_instance(self):
         global _test_pool
         _test_pool = None
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         db_mod._db_pool = None
         db_mod.DB_PATH = ":memory:"
         pool1 = await get_db_pool()
@@ -103,7 +103,7 @@ class TestConnectionPool:
 class TestDatabaseService:
     @pytest.mark.asyncio
     async def test_create_and_list_canvases(self):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
@@ -125,7 +125,7 @@ class TestDatabaseService:
 
     @pytest.mark.asyncio
     async def test_save_and_get_canvas_data(self):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
@@ -148,7 +148,7 @@ class TestDatabaseService:
 
     @pytest.mark.asyncio
     async def test_delete_canvas(self):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
@@ -171,7 +171,7 @@ class TestDatabaseService:
 
     @pytest.mark.asyncio
     async def test_rename_canvas(self):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
@@ -194,7 +194,7 @@ class TestDatabaseService:
 
     @pytest.mark.asyncio
     async def test_chat_session_crud(self):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
@@ -217,7 +217,7 @@ class TestDatabaseService:
 
     @pytest.mark.asyncio
     async def test_create_and_get_message(self):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
@@ -240,7 +240,7 @@ class TestDatabaseService:
 
     @pytest.mark.asyncio
     async def test_comfy_workflow_crud(self):
-        import db.db_service as db_mod
+        import database.db_service as db_mod
         old_path = db_mod.DB_PATH
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)

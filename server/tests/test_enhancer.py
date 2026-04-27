@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from tools.patterns.enhancer import PromptEnhancer, EnhancementResult
+from agents.tools.patterns.enhancer import PromptEnhancer, EnhancementResult
 
 
 class TestEnhancementResult:
@@ -31,7 +31,7 @@ class TestPromptEnhancer:
         assert enhancer.api_key == "test_key"
 
     def test_init_without_api_key(self):
-        from tools.patterns.enhancer import PromptEnhancer
+        from agents.tools.patterns.enhancer import PromptEnhancer
         with patch.object(PromptEnhancer, 'CONFIG_PATH') as mock_path:
             mock_path.exists.return_value = False
             enhancer = PromptEnhancer()

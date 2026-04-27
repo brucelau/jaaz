@@ -8,8 +8,8 @@ from core.lifespan import lifespan
 from core.routers import register_routers
 from core.static import setup_static_files
 from core.config import setup_proxy_bypass
-from ws_manager.manager import sio
-from services.log_service import app_logger as logger
+from web.websocket.manager import sio
+from web.services.log_service import app_logger as logger
 
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(

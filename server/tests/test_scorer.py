@@ -1,5 +1,5 @@
 import pytest
-from tools.patterns.scorer import AirMoldScorer
+from agents.tools.patterns.scorer import AirMoldScorer
 
 
 class TestAirMoldScorer:

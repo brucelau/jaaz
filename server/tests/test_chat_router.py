@@ -8,23 +8,23 @@ class TestChatRouterImports:
     """Test chat_router imports"""
 
     def test_chat_router_exists(self):
-        from routers.chat_router import router
+        from web.routers.chat_router import router
         assert router is not None
 
     def test_chat_endpoint_exists(self):
-        from routers.chat_router import router, chat
+        from web.routers.chat_router import router, chat
         assert chat is not None
 
     def test_cancel_endpoint_exists(self):
-        from routers.chat_router import router, cancel_chat
+        from web.routers.chat_router import router, cancel_chat
         assert cancel_chat is not None
 
     def test_magic_endpoint_exists(self):
-        from routers.chat_router import router, magic
+        from web.routers.chat_router import router, magic
         assert magic is not None
 
     def test_cancel_magic_endpoint_exists(self):
-        from routers.chat_router import router, cancel_magic
+        from web.routers.chat_router import router, cancel_magic
         assert cancel_magic is not None
 
 
@@ -33,7 +33,7 @@ class TestChatEndpoint:
 
     @pytest.fixture
     def app(self):
-        from routers.chat_router import router
+        from web.routers.chat_router import router
         app = FastAPI()
         app.include_router(router)
         return app
@@ -43,21 +43,21 @@ class TestChatEndpoint:
         return TestClient(app)
 
     def test_chat_returns_done_status(self, client):
-        with patch('routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
+        with patch('web.routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
             response = client.post('/api/chat', json={'messages': []}, headers={'Authorization': 'Bearer test_token'})
             assert response.status_code == 200
             assert response.json() == {'status': 'done'}
 
     def test_chat_calls_handle_chat(self, client):
-        with patch('routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
+        with patch('web.routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
             data = {'messages': [{'role': 'user', 'content': 'hello'}], 'session_id': 'test'}
             client.post('/api/chat', json=data, headers={'Authorization': 'Bearer test_token'})
             mock_handle.assert_called_once()
 
     def test_chat_passes_data_to_handler(self, client):
-        with patch('routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
+        with patch('web.routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
             data = {'messages': [{'role': 'user', 'content': 'hello'}], 'session_id': 'test', 'canvas_id': 'c1'}
             client.post('/api/chat', json=data, headers={'Authorization': 'Bearer test_token'})
@@ -71,7 +71,7 @@ class TestCancelChatEndpoint:
 
     @pytest.fixture
     def app(self):
-        from routers.chat_router import router
+        from web.routers.chat_router import router
         app = FastAPI()
         app.include_router(router)
         return app
@@ -81,7 +81,7 @@ class TestCancelChatEndpoint:
         return TestClient(app)
 
     def test_cancel_returns_cancelled_when_task_found(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock_get:
+        with patch('web.routers.chat_router.get_stream_task') as mock_get:
             mock_task = MagicMock()
             mock_task.done.return_value = False
             mock_get.return_value = mock_task
@@ -91,7 +91,7 @@ class TestCancelChatEndpoint:
             assert response.json() == {'status': 'cancelled'}
 
     def test_cancel_returns_not_found_when_no_task(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock_get:
+        with patch('web.routers.chat_router.get_stream_task') as mock_get:
             mock_get.return_value = None
 
             response = client.post('/api/cancel/nonexistent_session')
@@ -99,7 +99,7 @@ class TestCancelChatEndpoint:
             assert response.json() == {'status': 'not_found_or_done'}
 
     def test_cancel_returns_not_found_when_task_done(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock_get:
+        with patch('web.routers.chat_router.get_stream_task') as mock_get:
             mock_task = MagicMock()
             mock_task.done.return_value = True
             mock_get.return_value = mock_task
@@ -109,7 +109,7 @@ class TestCancelChatEndpoint:
             assert response.json() == {'status': 'not_found_or_done'}
 
     def test_cancel_calls_task_cancel(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock_get:
+        with patch('web.routers.chat_router.get_stream_task') as mock_get:
             mock_task = MagicMock()
             mock_task.done.return_value = False
             mock_get.return_value = mock_task
@@ -123,7 +123,7 @@ class TestMagicEndpoint:
 
     @pytest.fixture
     def app(self):
-        from routers.chat_router import router
+        from web.routers.chat_router import router
         app = FastAPI()
         app.include_router(router)
         return app
@@ -133,14 +133,14 @@ class TestMagicEndpoint:
         return TestClient(app)
 
     def test_magic_returns_done_status(self, client):
-        with patch('routers.chat_router.handle_magic', new_callable=AsyncMock) as mock_handle:
+        with patch('web.routers.chat_router.handle_magic', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
             response = client.post('/api/magic', json={'prompt': 'test'}, headers={'Authorization': 'Bearer test_token'})
             assert response.status_code == 200
             assert response.json() == {'status': 'done'}
 
     def test_magic_calls_handle_magic(self, client):
-        with patch('routers.chat_router.handle_magic', new_callable=AsyncMock) as mock_handle:
+        with patch('web.routers.chat_router.handle_magic', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
             data = {'prompt': 'generate magic image', 'session_id': 'magic_1'}
             client.post('/api/magic', json=data, headers={'Authorization': 'Bearer test_token'})
@@ -152,7 +152,7 @@ class TestCancelMagicEndpoint:
 
     @pytest.fixture
     def app(self):
-        from routers.chat_router import router
+        from web.routers.chat_router import router
         app = FastAPI()
         app.include_router(router)
         return app
@@ -162,7 +162,7 @@ class TestCancelMagicEndpoint:
         return TestClient(app)
 
     def test_cancel_magic_returns_cancelled_when_task_found(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock_get:
+        with patch('web.routers.chat_router.get_stream_task') as mock_get:
             mock_task = MagicMock()
             mock_task.done.return_value = False
             mock_get.return_value = mock_task
@@ -172,7 +172,7 @@ class TestCancelMagicEndpoint:
             assert response.json() == {'status': 'cancelled'}
 
     def test_cancel_magic_returns_not_found_when_no_task(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock_get:
+        with patch('web.routers.chat_router.get_stream_task') as mock_get:
             mock_get.return_value = None
 
             response = client.post('/api/magic/cancel/nonexistent_magic_session')
@@ -180,7 +180,7 @@ class TestCancelMagicEndpoint:
             assert response.json() == {'status': 'not_found_or_done'}
 
     def test_cancel_magic_returns_not_found_when_task_done(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock_get:
+        with patch('web.routers.chat_router.get_stream_task') as mock_get:
             mock_task = MagicMock()
             mock_task.done.return_value = True
             mock_get.return_value = mock_task
@@ -190,7 +190,7 @@ class TestCancelMagicEndpoint:
             assert response.json() == {'status': 'not_found_or_done'}
 
     def test_cancel_magic_calls_task_cancel(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock_get:
+        with patch('web.routers.chat_router.get_stream_task') as mock_get:
             mock_task = MagicMock()
             mock_task.done.return_value = False
             mock_get.return_value = mock_task

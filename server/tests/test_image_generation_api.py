@@ -9,9 +9,9 @@ from PIL import Image
 class TestImageGenerationAPI:
     @pytest.fixture
     def app(self):
-        from routers.image_router import router as image_router
-        from routers.chat_router import router as chat_router
-        from routers.root_router import router as root_router
+        from web.routers.image_router import router as image_router
+        from web.routers.chat_router import router as chat_router
+        from web.routers.root_router import router as root_router
 
         app = FastAPI()
         app.include_router(image_router)
@@ -24,9 +24,9 @@ class TestImageGenerationAPI:
         return TestClient(app)
 
     def test_upload_image_returns_file_info(self, client):
-        with patch('routers.image_router.FILES_DIR', '/tmp/test_files'), \
-             patch('routers.image_router.generate_file_id', return_value='test_id_123'), \
-             patch('routers.image_router.run_in_threadpool', new_callable=AsyncMock):
+        with patch('web.routers.image_router.FILES_DIR', '/tmp/test_files'), \
+             patch('web.routers.image_router.generate_file_id', return_value='test_id_123'), \
+             patch('web.routers.image_router.run_in_threadpool', new_callable=AsyncMock):
 
             img = Image.new('RGB', (100, 100), color='red')
             img_bytes = BytesIO()
@@ -49,13 +49,13 @@ class TestImageGenerationAPI:
         assert response.status_code == 422
 
     def test_get_file_returns_transparent_png_for_missing_file(self, client):
-        with patch('routers.image_router.os.path.exists', return_value=False):
+        with patch('web.routers.image_router.os.path.exists', return_value=False):
             response = client.get('/api/file/nonexistent.jpg')
             assert response.status_code == 200
             assert response.headers['content-type'] == 'image/png'
 
     def test_list_models_endpoint_accessible(self, client):
-        with patch('services.config_service.config_service') as mock_config:
+        with patch('web.services.config_service.config_service') as mock_config:
             mock_config.get_config.return_value = {
                 'openai': {
                     'url': 'https://api.openai.com',
@@ -67,7 +67,7 @@ class TestImageGenerationAPI:
             assert response.status_code == 200
 
     def test_list_tools_endpoint_accessible(self, client):
-        with patch('services.tool_service.tool_service') as mock_tool:
+        with patch('web.services.tool_service.tool_service') as mock_tool:
             mock_tool.tools = {
                 'test_tool': {
                     'id': 'test_tool',
@@ -83,7 +83,7 @@ class TestImageGenerationAPI:
 class TestMagicEndpoint:
     @pytest.fixture
     def app(self):
-        from routers.chat_router import router as chat_router
+        from web.routers.chat_router import router as chat_router
         app = FastAPI()
         app.include_router(chat_router)
         return app
@@ -93,7 +93,7 @@ class TestMagicEndpoint:
         return TestClient(app)
 
     def test_magic_endpoint_returns_done(self, client):
-        with patch('routers.chat_router.handle_magic', new_callable=AsyncMock) as mock:
+        with patch('web.routers.chat_router.handle_magic', new_callable=AsyncMock) as mock:
             mock.return_value = None
             response = client.post('/api/magic', json={
                 'messages': [{'role': 'user', 'content': 'generate image'}],
@@ -104,7 +104,7 @@ class TestMagicEndpoint:
             assert response.json() == {'status': 'done'}
 
     def test_magic_cancel_returns_not_found_or_done(self, client):
-        with patch('routers.chat_router.get_stream_task') as mock:
+        with patch('web.routers.chat_router.get_stream_task') as mock:
             mock.return_value = None
             response = client.post('/api/magic/cancel/nonexistent_session')
             assert response.status_code == 200
@@ -116,9 +116,9 @@ class TestImageGenerationFlow:
 
     @pytest.fixture
     def app(self):
-        from routers.image_router import router as image_router
-        from routers.chat_router import router as chat_router
-        from routers.root_router import router as root_router
+        from web.routers.image_router import router as image_router
+        from web.routers.chat_router import router as chat_router
+        from web.routers.root_router import router as root_router
 
         app = FastAPI()
         app.include_router(image_router)
@@ -132,9 +132,9 @@ class TestImageGenerationFlow:
 
     def test_upload_and_verify_image_flow(self, client):
         """Test uploading an image and verifying the response structure"""
-        with patch('routers.image_router.FILES_DIR', '/tmp/test_files'), \
-             patch('routers.image_router.generate_file_id', return_value='flow_test_id'), \
-             patch('routers.image_router.run_in_threadpool', new_callable=AsyncMock):
+        with patch('web.routers.image_router.FILES_DIR', '/tmp/test_files'), \
+             patch('web.routers.image_router.generate_file_id', return_value='flow_test_id'), \
+             patch('web.routers.image_router.run_in_threadpool', new_callable=AsyncMock):
 
             img = Image.new('RGB', (800, 600), color='blue')
             img_bytes = BytesIO()
@@ -158,9 +158,9 @@ class TestImageGenerationFlow:
 
     def test_multiple_image_uploads_return_different_ids(self, client):
         """Test that multiple uploads get unique file IDs"""
-        with patch('routers.image_router.FILES_DIR', '/tmp/test_files'), \
-             patch('routers.image_router.generate_file_id', side_effect=['id_1', 'id_2']), \
-             patch('routers.image_router.run_in_threadpool', new_callable=AsyncMock):
+        with patch('web.routers.image_router.FILES_DIR', '/tmp/test_files'), \
+             patch('web.routers.image_router.generate_file_id', side_effect=['id_1', 'id_2']), \
+             patch('web.routers.image_router.run_in_threadpool', new_callable=AsyncMock):
 
             img = Image.new('RGB', (100, 100), color='green')
             img_bytes = BytesIO()
@@ -188,7 +188,7 @@ class TestImageGenerationFlow:
 
     def test_chat_endpoint_structure(self, client):
         """Test chat endpoint accepts valid payload"""
-        with patch('routers.chat_router.handle_chat', new_callable=AsyncMock) as mock:
+        with patch('web.routers.chat_router.handle_chat', new_callable=AsyncMock) as mock:
             mock.return_value = None
             response = client.post('/api/chat', json={
                 'messages': [

@@ -1,7 +1,7 @@
 import pytest
 import httpx
 from unittest.mock import patch, MagicMock, AsyncMock
-from services.comfyui_execution_service import check_comfy_server_running, upload_image
+from web.services.comfyui_execution_service import check_comfy_server_running, upload_image
 
 @pytest.mark.asyncio
 async def test_check_comfy_server_running_success():
@@ -14,7 +14,7 @@ async def test_check_comfy_server_running_success():
     mock_client_ctx = AsyncMock()
     mock_client_ctx.__aenter__.return_value = mock_client
 
-    with patch("services.comfyui_execution_service.HttpClient.create", return_value=mock_client_ctx):
+    with patch("web.services.comfyui_execution_service.HttpClient.create", return_value=mock_client_ctx):
         result = await check_comfy_server_running("http://localhost:8188")
         assert result is True
 
@@ -29,7 +29,7 @@ async def test_check_comfy_server_running_failure():
     mock_client_ctx = AsyncMock()
     mock_client_ctx.__aenter__.return_value = mock_client
 
-    with patch("services.comfyui_execution_service.HttpClient.create", return_value=mock_client_ctx):
+    with patch("web.services.comfyui_execution_service.HttpClient.create", return_value=mock_client_ctx):
         result = await check_comfy_server_running("http://localhost:8188")
         assert result is False
 
@@ -44,6 +44,6 @@ async def test_upload_image_success():
     mock_client_ctx = AsyncMock()
     mock_client_ctx.__aenter__.return_value = mock_client
 
-    with patch("services.comfyui_execution_service.HttpClient.create", return_value=mock_client_ctx):
+    with patch("web.services.comfyui_execution_service.HttpClient.create", return_value=mock_client_ctx):
         result = await upload_image(b"fake_image_data", "http://localhost:8188", filename="test.png")
         assert result == "jaaz/test_image.png"

@@ -6,10 +6,10 @@ from fastapi.testclient import TestClient
 class TestSettingsRouter:
     @pytest.fixture
     def mock_services(self):
-        with patch('routers.settings_router.settings_service') as mock_ss, \
-             patch('routers.settings_router.db_service') as mock_db, \
-             patch('routers.settings_router.tool_service') as mock_tool, \
-             patch('routers.settings_router.list_user_enabled_knowledge') as mock_knowledge:
+        with patch('web.routers.settings_router.settings_service') as mock_ss, \
+             patch('web.routers.settings_router.db_service') as mock_db, \
+             patch('web.routers.settings_router.tool_service') as mock_tool, \
+             patch('web.routers.settings_router.list_user_enabled_knowledge') as mock_knowledge:
             mock_ss.exists_settings = AsyncMock(return_value=True)
             mock_ss.get_settings.return_value = {'proxy': 'system', 'enabled_knowledge': []}
             mock_ss.get_raw_settings.return_value = {'proxy': 'system'}
@@ -23,7 +23,7 @@ class TestSettingsRouter:
             yield {'ss': mock_ss, 'db': mock_db, 'tool': mock_tool, 'knowledge': mock_knowledge}
 
     def test_settings_exists(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -33,7 +33,7 @@ class TestSettingsRouter:
         assert 'exists' in response.json()
 
     def test_get_settings(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -42,7 +42,7 @@ class TestSettingsRouter:
         assert response.status_code == 200
 
     def test_update_settings(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -51,7 +51,7 @@ class TestSettingsRouter:
         assert response.status_code == 200
 
     def test_get_proxy_status(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -61,7 +61,7 @@ class TestSettingsRouter:
         assert 'enable' in response.json()
 
     def test_get_proxy_settings(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -71,7 +71,7 @@ class TestSettingsRouter:
         assert 'proxy' in response.json()
 
     def test_update_proxy_settings(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -80,7 +80,7 @@ class TestSettingsRouter:
         assert response.status_code == 200
 
     def test_update_proxy_invalid_format(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -89,7 +89,7 @@ class TestSettingsRouter:
         assert response.status_code == 400
 
     def test_create_workflow(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -103,7 +103,7 @@ class TestSettingsRouter:
         assert response.status_code == 200
 
     def test_list_workflows(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -112,7 +112,7 @@ class TestSettingsRouter:
         assert response.status_code == 200
 
     def test_delete_workflow(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)
@@ -121,7 +121,7 @@ class TestSettingsRouter:
         assert response.status_code == 200
 
     def test_get_enabled_knowledge(self, mock_services):
-        from routers.settings_router import router
+        from web.routers.settings_router import router
         from fastapi import FastAPI
         app = FastAPI()
         app.include_router(router)

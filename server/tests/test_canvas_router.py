@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 class TestCanvasRouter:
     @pytest.fixture
     def mock_router(self):
-        from routers import canvas_router
+        from web.routers import canvas_router
         mock_db = MagicMock()
         mock_db.list_canvases = AsyncMock(return_value=[])
         mock_db.create_canvas = AsyncMock(return_value=None)

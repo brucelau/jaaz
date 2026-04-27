@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 class TestStreamProcessorClass:
     def test_init_attributes(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         mock_ws = AsyncMock()
         mock_db = MagicMock()
         processor = StreamProcessor('session_123', mock_db, mock_ws)
@@ -18,7 +18,7 @@ class TestStreamProcessorClass:
         assert processor.last_streaming_tool_call_id is None
 
     def test_tools_requiring_confirmation_default(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         mock_ws = AsyncMock()
         mock_db = MagicMock()
         processor = StreamProcessor('session_123', mock_db, mock_ws)
@@ -26,7 +26,7 @@ class TestStreamProcessorClass:
 
     @pytest.mark.asyncio
     async def test_handle_chunk_values_type(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         mock_ws = AsyncMock()
         mock_db = MagicMock()
         processor = StreamProcessor('session_123', mock_db, mock_ws)
@@ -36,7 +36,7 @@ class TestStreamProcessorClass:
 
     @pytest.mark.asyncio
     async def test_handle_chunk_message_type(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         from langchain_core.messages import AIMessageChunk
         mock_ws = AsyncMock()
         mock_db = MagicMock()
@@ -46,7 +46,7 @@ class TestStreamProcessorClass:
 
     @pytest.mark.asyncio
     async def test_handle_tool_calls_sends_websocket(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         mock_ws = AsyncMock()
         mock_db = MagicMock()
         processor = StreamProcessor('session_123', mock_db, mock_ws)
@@ -56,7 +56,7 @@ class TestStreamProcessorClass:
 
     @pytest.mark.asyncio
     async def test_handle_tool_calls_requires_confirmation_skipped(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         mock_ws = AsyncMock()
         mock_db = MagicMock()
         processor = StreamProcessor('session_123', mock_db, mock_ws)
@@ -67,7 +67,7 @@ class TestStreamProcessorClass:
 
     @pytest.mark.asyncio
     async def test_handle_tool_call_chunks_with_args_only(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         mock_ws = AsyncMock()
         mock_db = MagicMock()
         processor = StreamProcessor('session_123', mock_db, mock_ws)
@@ -83,7 +83,7 @@ class TestStreamProcessorClass:
 
     @pytest.mark.asyncio
     async def test_handle_tool_call_chunks_sets_id(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         mock_ws = AsyncMock()
         mock_db = MagicMock()
         processor = StreamProcessor('session_123', mock_db, mock_ws)
@@ -96,13 +96,13 @@ class TestStreamProcessorClass:
 
 class TestGetAttrOrDict:
     def test_get_attr_or_dict_from_dict(self):
-        from services.langgraph_service.stream_processor import _get_attr_or_dict
+        from agents.langgraph_service.stream_processor import _get_attr_or_dict
         obj = {'name': 'test_name', 'args': {'prompt': 'hello'}}
         assert _get_attr_or_dict(obj, 'name') == 'test_name'
         assert _get_attr_or_dict(obj, 'args') == {'prompt': 'hello'}
 
     def test_get_attr_or_dict_from_object(self):
-        from services.langgraph_service.stream_processor import _get_attr_or_dict
+        from agents.langgraph_service.stream_processor import _get_attr_or_dict
         class MockObj:
             name = 'obj_name'
             args = {'prompt': 'world'}
@@ -111,16 +111,16 @@ class TestGetAttrOrDict:
         assert _get_attr_or_dict(obj, 'args') == {'prompt': 'world'}
 
     def test_get_attr_or_dict_none_obj(self):
-        from services.langgraph_service.stream_processor import _get_attr_or_dict
+        from agents.langgraph_service.stream_processor import _get_attr_or_dict
         assert _get_attr_or_dict(None, 'name') is None
 
     def test_get_attr_or_dict_missing_key(self):
-        from services.langgraph_service.stream_processor import _get_attr_or_dict
+        from agents.langgraph_service.stream_processor import _get_attr_or_dict
         obj = {'name': 'test'}
         assert _get_attr_or_dict(obj, 'missing') is None
 
     def test_get_attr_or_dict_missing_attr(self):
-        from services.langgraph_service.stream_processor import _get_attr_or_dict
+        from agents.langgraph_service.stream_processor import _get_attr_or_dict
         class MockObj:
             name = 'test'
         obj = MockObj()
@@ -129,9 +129,9 @@ class TestGetAttrOrDict:
 
 class TestToolsRequiringConfirmationEnv:
     def test_default_value(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         assert 'generate_video_by_veo3_fast_jaaz' in StreamProcessor.TOOLS_REQUIRING_CONFIRMATION
 
     def test_class_attribute_is_set(self):
-        from services.langgraph_service.stream_processor import StreamProcessor
+        from agents.langgraph_service.stream_processor import StreamProcessor
         assert isinstance(StreamProcessor.TOOLS_REQUIRING_CONFIRMATION, set)

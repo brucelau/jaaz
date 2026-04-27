@@ -7,30 +7,30 @@ from unittest.mock import patch
 
 class TestSettingsServiceInit:
     def test_default_settings_file_in_config_dir(self):
-        from db.settings_service import SettingsService
+        from database.settings_service import SettingsService
         service = SettingsService()
         assert "settings.json" in service.settings_file
 
     def test_settings_file_env_override(self):
         with patch.dict(os.environ, {"SETTINGS_PATH": "/custom/path/settings.json"}):
-            from db.settings_service import SettingsService
+            from database.settings_service import SettingsService
             service = SettingsService()
             assert service.settings_file == "/custom/path/settings.json"
 
 
 class TestSettingsServiceDefaults:
     def test_default_settings_has_required_keys(self):
-        from db.settings_service import DEFAULT_SETTINGS
+        from database.settings_service import DEFAULT_SETTINGS
         assert "proxy" in DEFAULT_SETTINGS
         assert "enabled_knowledge" in DEFAULT_SETTINGS
         assert "enabled_knowledge_data" in DEFAULT_SETTINGS
 
     def test_default_proxy_value(self):
-        from db.settings_service import DEFAULT_SETTINGS
+        from database.settings_service import DEFAULT_SETTINGS
         assert DEFAULT_SETTINGS["proxy"] == "system"
 
     def test_default_knowledge_lists_empty(self):
-        from db.settings_service import DEFAULT_SETTINGS
+        from database.settings_service import DEFAULT_SETTINGS
         assert DEFAULT_SETTINGS["enabled_knowledge"] == []
         assert DEFAULT_SETTINGS["enabled_knowledge_data"] == []
 
@@ -42,7 +42,7 @@ class TestSettingsServiceCRUD:
         os.close(fd)
         os.remove(path)
         with patch.dict(os.environ, {"SETTINGS_PATH": path}):
-            from db.settings_service import SettingsService
+            from database.settings_service import SettingsService
             service = SettingsService()
             yield service
             if os.path.exists(path):
@@ -123,8 +123,8 @@ class TestSettingsServiceErrorHandling:
         with tempfile.TemporaryDirectory() as tmpdir:
             bad_path = os.path.join(tmpdir, "nonexistent", "settings.json")
             with patch.dict(os.environ, {"SETTINGS_PATH": bad_path}):
-                from db.settings_service import SettingsService
+                from database.settings_service import SettingsService
                 service = SettingsService()
                 settings = service.get_settings()
-                from db.settings_service import DEFAULT_SETTINGS
+                from database.settings_service import DEFAULT_SETTINGS
                 assert settings == DEFAULT_SETTINGS

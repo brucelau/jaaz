@@ -6,15 +6,15 @@ class TestAgentManagerImports:
     """Test agent_manager imports"""
 
     def test_agent_manager_exists(self):
-        from services.langgraph_service.agent_manager import AgentManager
+        from agents.langgraph_service.agent_manager import AgentManager
         assert AgentManager is not None
 
     def test_create_agents_method_exists(self):
-        from services.langgraph_service.agent_manager import AgentManager
+        from agents.langgraph_service.agent_manager import AgentManager
         assert hasattr(AgentManager, 'create_agents')
 
     def test_get_last_active_agent_method_exists(self):
-        from services.langgraph_service.agent_manager import AgentManager
+        from agents.langgraph_service.agent_manager import AgentManager
         assert hasattr(AgentManager, 'get_last_active_agent')
 
 
@@ -23,14 +23,14 @@ class TestCreateAgents:
 
     @pytest.fixture
     def agent_manager(self):
-        from services.langgraph_service.agent_manager import AgentManager
+        from agents.langgraph_service.agent_manager import AgentManager
         return AgentManager
 
     def test_create_agents_returns_list(self, agent_manager):
-        with patch('services.langgraph_service.agent_manager.PlannerAgentConfig') as mock_planner, \
-             patch('services.langgraph_service.agent_manager.ImageVideoCreatorAgentConfig') as mock_ivc, \
-             patch('services.langgraph_service.agent_manager.create_react_agent') as mock_agent, \
-             patch('services.langgraph_service.agent_manager.tool_service') as mock_tool_svc:
+        with patch('agents.langgraph_service.agent_manager.PlannerAgentConfig') as mock_planner, \
+             patch('agents.langgraph_service.agent_manager.ImageVideoCreatorAgentConfig') as mock_ivc, \
+             patch('agents.langgraph_service.agent_manager.create_react_agent') as mock_agent, \
+             patch('agents.langgraph_service.agent_manager.tool_service') as mock_tool_svc:
             mock_planner_instance = MagicMock()
             mock_planner_instance.name = 'planner'
             mock_planner_instance.tools = []
@@ -56,11 +56,11 @@ class TestCreateAgents:
             assert len(result) == 3  # planner + image_video_creator + pneumat_enhancer
 
     def test_create_agents_filters_image_tools(self, agent_manager):
-        with patch('services.langgraph_service.agent_manager.PlannerAgentConfig') as mock_planner, \
-             patch('services.langgraph_service.agent_manager.ImageVideoCreatorAgentConfig') as mock_ivc, \
-             patch('services.langgraph_service.agent_manager.create_react_agent') as mock_agent, \
-             patch('services.langgraph_service.agent_manager.tool_service') as mock_tool_svc, \
-             patch('services.langgraph_service.agent_manager.logger') as mock_logger:
+        with patch('agents.langgraph_service.agent_manager.PlannerAgentConfig') as mock_planner, \
+             patch('agents.langgraph_service.agent_manager.ImageVideoCreatorAgentConfig') as mock_ivc, \
+             patch('agents.langgraph_service.agent_manager.create_react_agent') as mock_agent, \
+             patch('agents.langgraph_service.agent_manager.tool_service') as mock_tool_svc, \
+             patch('agents.langgraph_service.agent_manager.logger') as mock_logger:
             mock_planner_instance = MagicMock()
             mock_planner_instance.name = 'planner'
             mock_planner_instance.tools = []
@@ -96,7 +96,7 @@ class TestGetLastActiveAgent:
 
     @pytest.fixture
     def agent_manager(self):
-        from services.langgraph_service.agent_manager import AgentManager
+        from agents.langgraph_service.agent_manager import AgentManager
         return AgentManager
 
     def test_returns_none_when_no_messages(self, agent_manager):
@@ -148,13 +148,13 @@ class TestCreateLangGraphAgent:
 
     @pytest.fixture
     def agent_manager(self):
-        from services.langgraph_service.agent_manager import AgentManager
+        from agents.langgraph_service.agent_manager import AgentManager
         return AgentManager
 
     def test_creates_agent_with_handoff_tools(self, agent_manager):
-        with patch('services.langgraph_service.agent_manager.create_react_agent') as mock_create_agent, \
-             patch('services.langgraph_service.agent_manager.create_handoff_tool') as mock_handoff, \
-             patch('services.langgraph_service.agent_manager.tool_service') as mock_tool_svc:
+        with patch('agents.langgraph_service.agent_manager.create_react_agent') as mock_create_agent, \
+             patch('agents.langgraph_service.agent_manager.create_handoff_tool') as mock_handoff, \
+             patch('agents.langgraph_service.agent_manager.tool_service') as mock_tool_svc:
             mock_handoff.return_value = MagicMock()
             mock_tool_svc.get_tool.return_value = MagicMock()
             mock_tool_svc.get_all_tools.return_value = {}
@@ -174,8 +174,8 @@ class TestCreateLangGraphAgent:
             mock_create_agent.assert_called_once()
 
     def test_creates_agent_with_business_tools(self, agent_manager):
-        with patch('services.langgraph_service.agent_manager.create_react_agent') as mock_create_agent, \
-             patch('services.langgraph_service.agent_manager.tool_service') as mock_tool_svc:
+        with patch('agents.langgraph_service.agent_manager.create_react_agent') as mock_create_agent, \
+             patch('agents.langgraph_service.agent_manager.tool_service') as mock_tool_svc:
             mock_tool = MagicMock()
             mock_tool_svc.get_tool.return_value = mock_tool
             mock_tool_svc.get_all_tools.return_value = {'system_tool': {'provider': 'system'}}
