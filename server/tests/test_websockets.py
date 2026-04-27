@@ -7,7 +7,8 @@ class TestWebsocketsManager:
         from ws_manager.manager import add_connection, active_connections
         add_connection('test_sid', {'user': 'test'})
         assert 'test_sid' in active_connections
-        assert active_connections['test_sid'] == {'user': 'test'}
+        assert active_connections['test_sid']['user_info'] == {'user': 'test'}
+        assert active_connections['test_sid']['authenticated'] == True
 
     def test_remove_connection(self):
         from ws_manager.manager import add_connection, remove_connection, active_connections

@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from tools.patterns.enhancer import PromptEnhancer, EnhancementResult
 
 
@@ -30,12 +31,16 @@ class TestPromptEnhancer:
         assert enhancer.api_key == "test_key"
 
     def test_init_without_api_key(self):
-        enhancer = PromptEnhancer()
-        assert enhancer.api_key is None
+        from tools.patterns.enhancer import PromptEnhancer
+        with patch.object(PromptEnhancer, 'CONFIG_PATH') as mock_path:
+            mock_path.exists.return_value = False
+            enhancer = PromptEnhancer()
+            assert not enhancer.api_key
 
-    def test_enhance_returns_enhancement_result(self):
+    @pytest.mark.asyncio
+    async def test_enhance_returns_enhancement_result(self):
         enhancer = PromptEnhancer(api_key="fake_key")
-        result = enhancer.enhance("test prompt")
+        result = await enhancer.enhance("test prompt")
         assert isinstance(result, EnhancementResult)
         assert result.original_input == "test prompt"
 

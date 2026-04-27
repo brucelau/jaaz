@@ -1,40 +1,46 @@
-[ideogram]
-api_key = "FKuqCMXpdXQMt_HNn-Sc1VxIChkqGxwwQ0O5t3R0hI8qdu5rWVBmuRfEUHnIDo18XdMZd49kKimoXbYNktdRlA"
-
-[nano_banana]
-api_key = "AIzaSyBNqElxQW5SrKa2-6u_9Ke0aiif_BdEF3w"
-
 [comfyui]
 url = "http://100.75.202.111:8188"
 api_key = ""
-
-[openai]
-url = "https://api.minimax.io/v1/"
-api_key = "sk-cp-YMM0kQNYP_J49amPI6unbwjyi4FJtP2lItvf0cvVVf_5ixRi8V5LIYBWgbpvUN3yEl_HwN0UQmndezTEGs_jZfd8dbJdpMgpngs_BRaZGHGn7_v7Kzhw6b4"
-max_tokens = 65536
 
 [minimax]
 url = "https://api.minimax.io/v1/"
 api_key = "sk-cp-YMM0kQNYP_J49amPI6unbwjyi4FJtP2lItvf0cvVVf_5ixRi8V5LIYBWgbpvUN3yEl_HwN0UQmndezTEGs_jZfd8dbJdpMgpngs_BRaZGHGn7_v7Kzhw6b4"
 max_tokens = 8192
 
+[openai]
+url = "https://api.minimax.io/v1/"
+api_key = "sk-cp-YMM0kQNYP_J49amPI6unbwjyi4FJtP2lItvf0cvVVf_5ixRi8V5LIYBWgbpvUN3yEl_HwN0UQmndezTEGs_jZfd8dbJdpMgpngs_BRaZGHGn7_v7Kzhw6b4"
+max_tokens = 65536
+
 [gemini]
 url = "https://generativelanguage.googleapis.com/"
-api_key = "AIzaSyBNqElxQW5SrKa2-6u_9Ke0aiif_BdEF3w"
+api_key = "AIzaSyAtd9naJNqjHhYbSuZUSg9LEITwjvrr7F4"
 max_tokens = 8192
 
-[gemini.models.gemini-2.5-pro]
-type = "text"
+[ideogram]
+api_key = "FKuqCMXpdXQMt_HNn-Sc1VxIChkqGxwwQ0O5t3R0hI8qdu5rWVBmuRfEUHnIDo18XdMZd49kKimoXbYNktdRlA"
+is_custom = true
 
-[gemini.models.gemini-2.5-flash]
-type = "text"
-
-[gemini.models.gemini-2.0-flash]
-type = "text"
+[nano_banana]
+api_key = "AIzaSyAtd9naJNqjHhYbSuZUSg9LEITwjvrr7F4"
+is_custom = true
 
 [comfyui.models]
 
-[minimax.models.MiniMax-M2.5-highspeed]
+[ideogram.models]
+
+[nano_banana.models]
+
+[minimax.models."MiniMax-M2.5-highspeed"]
+type = "text"
+
+[minimax.models."MiniMax-M2.7-highspeed"]
+type = "text"
+
+[openai.models.gpt-4o]
+type = "text"
+
+[openai.models.gpt-4o-mini]
 type = "text"
 
 [openai.models.qwen3-max-2026-01-23]
@@ -52,3 +58,12 @@ is_custom = true
 [openai.models.glm-5]
 type = "text"
 is_custom = true
+
+[gemini.models."gemini-2.5-pro"]
+type = "text"
+
+[gemini.models."gemini-2.5-flash"]
+type = "text"
+
+# [gemini.models."gemini-2.0-flash"]
+# type = "text"

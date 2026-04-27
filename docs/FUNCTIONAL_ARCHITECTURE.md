@@ -11,7 +11,7 @@
 │                         React Frontend                          │
 │                    (Socket.IO 实时通信)                          │
 └────────────────────────────┬────────────────────────────────────┘
-                             │ HTTP/WebSocket
+                              │ HTTP/WebSocket
 ┌────────────────────────────▼────────────────────────────────────┐
 │                      FastAPI Backend                            │
 │  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
@@ -22,25 +22,25 @@
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │              Pattern Enhancement System                  │   │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │   │
-│  │  │ Enhancer.py │  │ Scorer.py   │  │ Airmold Prompt  │  │   │
-│  │  │ (Gemini 3.1)│→→│ (Selene)    │→→│ Enhancer        │  │   │
+│  │  │ Enhancer.py │  │ Scorer.py   │  │ Inflatable      │  │   │
+│  │  │ (Gemini 3.1)│→→│ (Selene)    │→→│ Prompt Enhancer │  │   │
 │  │  └─────────────┘  └─────────────┘  └─────────────────┘  │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │                                                                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
-│  │  DB Service  │  │ Config Svc   │  │  Stream Processor     │  │
-│  │  (SQLite)    │  │ (Provider)   │  │  (实时流输出)          │  │
+│  │  DB Service  │  │ Config Svc   │  │  Auth Service        │  │
+│  │  (SQLite)    │  │ (Provider)   │  │  (SQLite + bcrypt)   │  │
 │  └──────────────┘  └──────────────┘  └────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              │                              │
-     ┌────────▼────────┐         ┌──────────▼──────────┐
-     │  Gemini (Google) │         │  Selene (远程 Mac)   │
-     │  100.75.202.111  │         │  :8080              │
-     │  提示生成模型    │         │  Llama-3.1-8B       │
-     │  gemini-3.1-flash│        │  MPS Backend        │
-     └──────────────────┘         └─────────────────────┘
+                              │
+               ┌──────────────┴──────────────┐
+               │                              │
+      ┌────────▼────────┐         ┌──────────▼──────────┐
+      │  Gemini (Google) │         │  Selene (远程 Mac)   │
+      │  100.75.202.111  │         │  :8080              │
+      │  提示生成模型    │         │  Llama-3.1-8B       │
+      │  gemini-3.1-flash│        │  MPS Backend        │
+      └──────────────────┘         └─────────────────────┘
 ```
 
 ## 数据流
@@ -63,7 +63,7 @@
 
 **详细步骤：**
 
-1. **用户输入** → `enhance_airmold_prompt.py`
+1. **用户输入** → `enhance_inflatable_prompt.py`
 2. **Gemini 生成** → `enhancer.py` 调用 `gemini-3.1-flash` 生成 1 个候选
 3. **Selene 评分** → `scorer.py` 调用 `http://100.75.202.111:8080/v1/chat/completions`
    - 评估 4 个维度：语法正确性、语义一致性、风格一致性、创意与原创性
@@ -109,6 +109,8 @@ Agent Manager
 | `config_service.py` | Provider 配置（Gemini 等） |
 | `db_service.py` | SQLite 持久化 |
 | `StreamProcessor.py` | 实时流式输出处理 |
+| `auth_service.py` | 本地用户注册/登录/Token 管理 |
+| `routers/auth_router.py` | 认证 API 路由 |
 
 ### Pattern 增强系统
 
@@ -116,7 +118,7 @@ Agent Manager
 |------|------|
 | `scorer.py` | Selene 评分，`evaluate_with_feedback()` 方法 |
 | `enhancer.py` | Gemini LLM 提示增强，支持 feedback 参数 |
-| `enhance_airmold_prompt.py` | 重试循环，串联评分与增强 |
+| `enhance_inflatable_prompt.py` | 重试循环，串联评分与增强 |
 | `design_patterns.json` | 模式数据库 |
 
 ### Selene 服务（远程 Mac）
@@ -145,7 +147,7 @@ Agent Manager
 
 ## 日志增强点
 
-- `enhance_airmold_prompt.py` — 每次尝试的候选、评分、反馈、最终选择
+- `enhance_inflatable_prompt.py` — 每次尝试的候选、评分、反馈、最终选择
 - `scorer.py` — Selene 请求与响应
 - `enhancer.py` — Gemini 输入/输出
 - `StreamProcessor.py` — 英文 prompt 生成
@@ -176,12 +178,12 @@ Agent Manager
 - [x] 详细日志增强
 - [x] Prompt 生成模型升级到 gemini-3.1-flash
 - [x] 深度代码审查
+- [x] 用户认证系统（本地 SQLite + bcrypt，Token 认证）
 
 ## 待办
 
 - [ ] 端到端流程验证（Gemini + Selene 集成）
 - [ ] 英文 prompt 日志捕获验证
-- [ ] 用户认证（当前无 auth）
 - [ ] image_designer/video_designer 接入主流程
 
 ## 相关文件路径
@@ -190,6 +192,7 @@ Agent Manager
 /Users/cyberway/ocworkspace/jaaz/
 ├── server/
 │   ├── main.py
+│   ├── auth.db
 │   ├── chat_service.py
 │   ├── services/
 │   │   ├── langgraph_service/
@@ -199,13 +202,16 @@ Agent Manager
 │   │   │   └── configs/image_vide_creator_config.py
 │   │   ├── config_service.py
 │   │   ├── db_service.py
-│   │   └── tool_service.py
+│   │   ├── tool_service.py
+│   │   └── auth_service.py
+│   ├── routers/
+│   │   └── auth_router.py
 │   └── tools/
 │       ├── patterns/
 │       │   ├── scorer.py
 │       │   ├── enhancer.py
 │       │   └── design_patterns.json
-│       └── enhance_airmold_prompt.py
+│       └── enhance_inflatable_prompt.py
 ├── scripts/
 │   ├── selene_server.py
 │   └── selene_client.py

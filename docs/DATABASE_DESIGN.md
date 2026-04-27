@@ -3,9 +3,19 @@
 ## 概览
 
 - **数据库**: SQLite (`aiosqlite`)
-- **数据库文件**: `user_data/localmanus.db`
+- **主数据库文件**: `server/user_data/localmanus.db`
+- **认证数据库文件**: `server/auth.db`
 - **连接池**: `ConnectionPool` — 复用连接，减少每次请求新建连接的开销
 - **迁移系统**: 版本化管理，当前版本 v4
+
+---
+
+## 数据库文件
+
+| 文件 | 用途 |
+|------|------|
+| `server/user_data/localmanus.db` | 主数据库：画布、会话、消息、工作流 |
+| `server/auth.db` | 认证数据库：用户、Token |
 
 ---
 
@@ -90,6 +100,31 @@
 
 **索引:**
 - `idx_comfy_workflows_updated_at` ON `updated_at DESC, id DESC`
+
+---
+
+### 5. `users` — 用户账户（`auth.db`）
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| `id` | TEXT | PRIMARY KEY | UUID |
+| `username` | TEXT | UNIQUE, NOT NULL | 用户名 |
+| `email` | TEXT | UNIQUE, NOT NULL | 邮箱 |
+| `password_hash` | TEXT | NOT NULL | bcrypt 哈希 |
+| `created_at` | REAL | NOT NULL | 创建时间（Unix timestamp） |
+
+---
+
+### 6. `tokens` — 认证令牌（`auth.db`）
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| `token` | TEXT | PRIMARY KEY | Token 值（`local_` 前缀） |
+| `user_id` | TEXT | FOREIGN KEY → `users(id)` | 所属用户 |
+| `created_at` | REAL | NOT NULL | 创建时间（Unix timestamp） |
+| `expires_at` | REAL | NOT NULL | 过期时间（Unix timestamp） |
+
+Token 有效期 7 天。
 
 ---
 

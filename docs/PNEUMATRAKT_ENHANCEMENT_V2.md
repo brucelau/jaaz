@@ -3,8 +3,8 @@
 ## 背景
 
 当前流程存在以下问题：
-1. `enhance_airmold_prompt` 只返回 1 个候选 prompt
-2. `score_airmold_prompt` 是可选调用，未集成到主流程
+1. `enhance_inflatable_prompt` 只返回 1 个候选 prompt
+2. `score_inflatable_prompt` 是可选调用，未集成到主流程
 3. 评分机制形同虚设，无法有效筛选优质 prompt
 
 ## 新流程
@@ -14,7 +14,7 @@
     │
     ▼
 ┌─────────────────────────────────────┐
-│ enhance_airmold_prompt              │
+│ enhance_inflatable_prompt              │
 │ 生成 3 个候选中文 prompt              │
 │ (LLM 生成，温度 0.8-0.9)           │
 └─────────────────────────────────────┘
@@ -59,15 +59,15 @@ Agent 根据 Design Strategy Doc 生成英文 prompt
 generate_image(英文 prompt)
     │
     ▼
-check_airmold_image → VQA 检查
+check_inflatable_image → VQA 检查
     │
     ▼ (如有错误)
-refine_airmold_prompt → 修正
+refine_inflatable_prompt → 修正
 ```
 
 ## 返回格式
 
-### enhance_airmold_prompt 返回
+### enhance_inflatable_prompt 返回
 
 ```json
 {
@@ -106,7 +106,7 @@ def select_best(results: List[ScoringResult]) -> str:
 
 ## 实现要点
 
-### 1. enhance_airmold_prompt 改造
+### 1. enhance_inflatable_prompt 改造
 
 - `_enhance_with_llm()` 返回 JSON 数组格式
 - temperature 调高到 0.8-0.9（更有创意）
@@ -114,13 +114,13 @@ def select_best(results: List[ScoringResult]) -> str:
 
 ### 2. 新增批量评分逻辑
 
-- 位置：在 `enhance_airmold_prompt` 调用后
+- 位置：在 `enhance_inflatable_prompt` 调用后
 - 方式：并行评分
 - 返回：最优候选
 
 ### 3. 流程控制
 
-- Agent 调用 `enhance_airmold_prompt` 后自动进行评分
+- Agent 调用 `enhance_inflatable_prompt` 后自动进行评分
 - 若评分不通过，**enhancer 重新生成 3 个候选**（最多重试 3 次）
 - 重试 3 次后，**直接选最优**（不管是否达标）
 
@@ -130,7 +130,7 @@ def select_best(results: List[ScoringResult]) -> str:
 |------|------|
 | `enhancer.py` | `_enhance_with_llm()` 返回 3 个候选 |
 | `scorer.py` | 可能需要适配批量评分 |
-| `enhance_airmold_prompt.py` | 新增批量评分+选择逻辑 |
+| `enhance_inflatable_prompt.py` | 新增批量评分+选择逻辑 |
 | `image_vide_creator_config.py` | 更新 system prompt |
 
 ## 待定问题

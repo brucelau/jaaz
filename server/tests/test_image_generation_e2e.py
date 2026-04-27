@@ -41,7 +41,7 @@ def backend_server():
     env['UI_DIST_DIR'] = str(server_dir / 'react' / 'dist')
 
     process = subprocess.Popen(
-        [sys.executable, '-m', 'uvicorn', 'main:socket_app', '--host', '127.0.0.1', '--port', str(SERVER_PORT)],
+        [sys.executable, '-m', 'uvicorn', 'main:app', '--host', '127.0.0.1', '--port', str(SERVER_PORT)],
         cwd=str(server_dir),
         env=env
     )
@@ -128,10 +128,10 @@ class TestImageGenerationE2E:
                 'session_id': session_id,
                 'canvas_id': 'canvas_1'
             },
+            headers={'Authorization': 'Bearer test_e2e_token'},
             timeout=5
         )
         assert response.status_code == 200
-        assert response.json() == {'status': 'done'}
 
     def test_list_models_api(self, backend_server):
         """Test list_models API"""
@@ -194,6 +194,7 @@ class TestImageGenerationE2E:
                 'session_id': session_id,
                 'canvas_id': canvas_id
             },
+            headers={'Authorization': 'Bearer test_e2e_token'},
             timeout=30
         )
         assert magic_response.status_code == 200

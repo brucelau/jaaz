@@ -36,6 +36,7 @@ import ToolcallProgressUpdate from './ToolcallProgressUpdate'
 import ShareTemplateDialog from './ShareTemplateDialog'
 
 import { useConfigs } from '@/contexts/configs'
+import { useSocket } from '@/contexts/socket'
 import 'react-photo-view/dist/react-photo-view.css'
 import { DEFAULT_SYSTEM_PROMPT } from '@/constants'
 import { ModelInfo, ToolInfo } from '@/api/model'
@@ -63,6 +64,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [session, setSession] = useState<Session | null>(null)
   const { initCanvas, setInitCanvas } = useConfigs()
   const { authStatus } = useAuth()
+  const { socketManager } = useSocket()
   const [showShareDialog, setShowShareDialog] = useState(false)
   const queryClient = useQueryClient()
 
@@ -514,6 +516,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
 
     sessionIdRef.current = sessionId
+    socketManager?.joinSession(sessionId)
 
     const resp = await fetch('/api/chat_session/' + sessionId)
     const data = await resp.json()

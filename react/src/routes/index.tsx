@@ -20,7 +20,7 @@ export const Route = createFileRoute('/')({
 function Home() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { setInitCanvas } = useConfigs()
+  const { setInitCanvas, setShowLoginDialog } = useConfigs()
 
   const { mutate: createCanvasMutation, isPending } = useMutation({
     mutationFn: createCanvas,
@@ -35,9 +35,13 @@ function Home() {
       })
     },
     onError: (error) => {
-      toast.error(t('common:messages.error'), {
-        description: error.message,
-      })
+      if (error.message === 'Authentication required') {
+        setShowLoginDialog(true)
+      } else {
+        toast.error(t('common:messages.error'), {
+          description: error.message,
+        })
+      }
     },
   })
 

@@ -10,7 +10,7 @@
 - [x] `server/tools/patterns/matcher.py` - PatternMatcher 关键词匹配
 - [x] `server/tools/patterns/enhancer.py` - PromptEnhancer 增强生成
 - [x] `server/tools/patterns/design_patterns.json` - 气模设计规范知识库
-- [x] `server/tools/enhance_airmold_prompt.py` - LangGraph 工具
+- [x] `server/tools/enhance_inflatable_prompt.py` - LangGraph 工具
 - [x] `server/services/tool_service.py` - 工具注册
 - [x] `server/services/langgraph_service/configs/image_vide_creator_config.py` - System prompt 更新
 
@@ -18,20 +18,20 @@
 - [x] `server/tools/patterns/error_patterns.json` - 20种错误类型及修正策略
 - [x] `server/tools/patterns/refinement.py` - RefinementEngine 错误修正引擎
 - [x] `server/tools/patterns/scorer.py` - AirMoldScorer 评分引擎
-- [x] `refine_airmold_prompt` 工具 - 基于错误反馈修正 prompt
-- [x] `score_airmold_prompt` 工具 - 四维度评分
+- [x] `refine_inflatable_prompt` 工具 - 基于错误反馈修正 prompt
+- [x] `score_inflatable_prompt` 工具 - 四维度评分
 
 ### Phase 3: VQA 错误检查集成 ✅
 - [x] `server/tools/patterns/vqa_checker.py` - VQA 图像检查器
-- [x] `check_airmold_image` 工具 - VQA 图像质量检查
+- [x] `check_inflatable_image` 工具 - VQA 图像质量检查
 - [x] 集成 VQA 到工具流程
 - [x] 更新 ImageVideoCreator prompt 添加 VQA 检查指引
 
 ### Phase 4: 端到端测试 ✅
-- [x] 测试 enhance_airmold_prompt 工具链
-- [x] 测试 refine_airmold_prompt 迭代修正
-- [x] 测试 score_airmold_prompt 评分
-- [x] 测试 check_airmold_image VQA 流程
+- [x] 测试 enhance_inflatable_prompt 工具链
+- [x] 测试 refine_inflatable_prompt 迭代修正
+- [x] 测试 score_inflatable_prompt 评分
+- [x] 测试 check_inflatable_image VQA 流程
 - [x] 修复 refinement.py 规则修正 bug
 
 ## 暂不实现（可选）
@@ -115,20 +115,20 @@ Pass 标准: overall >= 3.5
 
 | 工具 | 描述 |
 |------|------|
-| `enhance_airmold_prompt` | 增强气模设计 prompt |
-| `refine_airmold_prompt` | 基于错误反馈修正 prompt |
-| `score_airmold_prompt` | 评估 prompt 质量 |
-| `check_airmold_image` | VQA 图像质量检查 |
+| `enhance_inflatable_prompt` | 增强气模设计 prompt |
+| `refine_inflatable_prompt` | 基于错误反馈修正 prompt |
+| `score_inflatable_prompt` | 评估 prompt 质量 |
+| `check_inflatable_image` | VQA 图像质量检查 |
 
 ## 工作流
 
 ```
 用户输入 -> PatternMatcher.match() -> 匹配设计规范
     -> PromptEnhancer.enhance() -> 增强 prompt
-    -> score_airmold_prompt() -> 评分检查
+    -> score_inflatable_prompt() -> 评分检查
     -> generate_image() -> 生成图像
-    -> check_airmold_image() -> VQA 检查
-    -> refine_airmold_prompt() -> 错误修正（如有）
+    -> check_inflatable_image() -> VQA 检查
+    -> refine_inflatable_prompt() -> 错误修正（如有）
     -> 重新生成（如需要）
 ```
 

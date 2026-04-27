@@ -1,5 +1,6 @@
 import { Message, Model } from '@/types/types'
 import { ModelInfo, ToolInfo } from './model'
+import { getAccessToken } from './auth'
 
 export const getChatSession = async (sessionId: string) => {
   const response = await fetch(`/api/chat_session/${sessionId}`)
@@ -15,11 +16,14 @@ export const sendMessages = async (payload: {
   toolList: ToolInfo[]
   systemPrompt: string | null
 }) => {
+  const token = getAccessToken()
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
   const response = await fetch(`/api/chat`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       messages: payload.newMessages,
       canvas_id: payload.canvasId,

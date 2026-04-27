@@ -18,35 +18,21 @@
 
 ## 🔴 P0 — 严重问题（必须修复）
 
-### 1. 安全：无 API 鉴权
+### 1. ~~安全：无 API 鉴权~~ ✅ 已修复
 
-**严重性**：严重
+**状态**: 2026-04-27 已实现本地认证系统。
 
-所有 API 端点完全开放，无任何认证机制：
+实现方案：
 
-| 文件 | 端点 | 风险 |
+| 组件 | 文件 | 说明 |
 |------|------|------|
-| `routers/chat_router.py` | `/api/chat` | 任何人可发起聊天请求，耗尽 Gemini/Selene quota |
-| `routers/config_router.py` | `/api/config/*` | 可读取/修改所有 provider API keys |
-| `routers/workspace.py` | `update_file`, `delete_file`, `read_file` 等 | 可读写服务器任意文件 |
-| `websocket_router.py` | Socket.IO connect | `auth` 参数被接收但未验证 |
+| 用户存储 | `server/auth.db` (SQLite) | bcrypt 哈希密码 |
+| Token 管理 | `services/auth_service.py` | `local_xxx` Token，7 天有效期 |
+| Auth API | `routers/auth_router.py` | `/api/auth/register\|login\|refresh-token` |
+| HTTP 中间件 | `routers/chat_router.py` | `/api/chat`, `/api/magic` 需要认证 |
+| WebSocket 验证 | `ws_manager/handlers.py` | `join_session` 时验证 auth 状态 |
 
-**修复建议**：
-
-```python
-# main.py — 添加简单 API Key 中间件
-from fastapi import Request, HTTPException
-
-API_KEY = os.getenv("JAAZ_API_KEY", "")
-
-@app.middleware("http")
-async def auth_middleware(request: Request, call_next):
-    if request.url.path.startswith("/api/"):
-        key = request.headers.get("X-API-Key")
-        if key != API_KEY:
-            raise HTTPException(status_code=401, detail="Unauthorized")
-    return await call_next(request)
-```
+需要认证的端点：`/api/chat`、`/api/magic`、`/api/canvas/create`。
 
 ---
 
@@ -232,7 +218,7 @@ for tool_id, tool_info in tool_service.get_all_tools().items():
 
 - `chat_service.py` 几乎无类型
 - `tool_service.py` 部分方法无返回类型
-- `enhance_airmold_prompt.py` 的 tool function 参数无 schema 验证（虽然用了 Pydantic）
+- `enhance_inflatable_prompt.py` 的 tool function 参数无 schema 验证（虽然用了 Pydantic）
 
 ---
 
@@ -246,7 +232,7 @@ for tool_id, tool_info in tool_service.get_all_tools().items():
 # scorer.py
 suggestions.append("材质不够明确，缺少 PVC/TPU/防水面料 等专业材质描述")
 
-# enhance_airmold_prompt.py
+# enhance_inflatable_prompt.py
 return "图像检查通过：未发现明显错误。"
 ```
 

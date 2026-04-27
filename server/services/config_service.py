@@ -52,7 +52,7 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
         'max_tokens': 8192,
     },
     'gemini': {
-        'models': _env_models("GEMINI_MODELS", "gemini-2.5-pro,gemini-2.5-flash,gemini-2.0-flash"),
+        'models': _env_models("GEMINI_MODELS", "gemini-2.5-pro,gemini-2.5-flash"),
         'url': os.getenv("GEMINI_URL", 'https://generativelanguage.googleapis.com/'),
         'api_key': '',
         'max_tokens': 8192,

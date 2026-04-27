@@ -1,18 +1,37 @@
-from fastapi import APIRouter, Request
-#from routers.agent import chat
+from fastapi import APIRouter, Request, HTTPException, Header
 from services.chat_service import handle_chat
 from db.db_service import db_service
 import asyncio
 import json
+from pathlib import Path
+import sqlite3
+from typing import Optional
 
 router = APIRouter(prefix="/api/canvas")
+
+AUTH_DB = Path(__file__).parent.parent / "auth.db"
+
+def validate_local_token(token: str) -> bool:
+    if not token.startswith("local_"):
+        return True
+    conn = sqlite3.connect(AUTH_DB, timeout=10)
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM tokens WHERE token = ? AND expires_at > ?", (token, __import__("time").time()))
+    result = cur.fetchone()
+    conn.close()
+    return result is not None
 
 @router.get("/list")
 async def list_canvases():
     return await db_service.list_canvases()
 
 @router.post("/create")
-async def create_canvas(request: Request):
+async def create_canvas(request: Request, authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    token = authorization[7:]
+    if token.startswith("local_") and not validate_local_token(token):
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
     data = await request.json()
     id = data.get('canvas_id')
     name = data.get('name')

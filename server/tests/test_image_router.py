@@ -89,10 +89,11 @@ class TestGetFileEndpoint:
     def client(self, app):
         return TestClient(app)
 
-    def test_get_file_returns_404_when_not_found(self, client):
+    def test_get_file_returns_transparent_png_when_not_found(self, client):
         with patch('routers.image_router.os.path.exists', return_value=False):
             response = client.get('/api/file/nonexistent_file.jpg')
-            assert response.status_code == 404
+            assert response.status_code == 200
+            assert response.headers['content-type'] == 'image/png'
 
     def test_get_file_returns_file_response(self, client):
         with patch('routers.image_router.os.path.exists', return_value=True), \

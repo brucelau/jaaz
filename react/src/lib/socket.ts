@@ -1,6 +1,7 @@
 import * as ISocket from '@/types/socket'
 import { io, Socket } from 'socket.io-client'
 import { eventBus } from './event'
+import { getAccessToken } from '@/api/auth'
 
 export interface SocketConfig {
   serverUrl?: string
@@ -28,12 +29,15 @@ export class SocketIOManager {
         this.socket.disconnect()
       }
 
+      const token = getAccessToken()
       this.socket = io(url, {
-        transports: ['websocket'],
-        upgrade: false,
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        upgrade: true,
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: this.reconnectDelay,
+        auth: token ? { token } : {},
       })
 
       this.socket.on('connect', () => {
@@ -145,6 +149,12 @@ export class SocketIOManager {
   ping(data: unknown) {
     if (this.socket && this.connected) {
       this.socket.emit('ping', data)
+    }
+  }
+
+  joinSession(sessionId: string) {
+    if (this.socket && this.connected) {
+      this.socket.emit('join_session', { session_id: sessionId })
     }
   }
 

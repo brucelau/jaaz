@@ -33,7 +33,7 @@ class TestCanvasRouter:
         app = FastAPI()
         app.include_router(mock_router['router'])
         client = TestClient(app)
-        response = client.post('/api/canvas/create', json={'canvas_id': 'c1', 'name': 'Test'})
+        response = client.post('/api/canvas/create', json={'canvas_id': 'c1', 'name': 'Test'}, headers={'Authorization': 'Bearer test_token'})
         assert response.status_code == 200
         assert response.json()['id'] == 'c1'
 

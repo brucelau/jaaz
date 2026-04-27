@@ -4,6 +4,7 @@ from langgraph.graph.graph import CompiledGraph
 from langchain_core.tools import BaseTool
 from models.tool_model import ToolInfoJson
 from services.langgraph_service.configs.image_vide_creator_config import ImageVideoCreatorAgentConfig
+from services.langgraph_service.configs.pneumat_enhancer_config import PneumatEnhancerAgentConfig
 from .configs import PlannerAgentConfig, create_handoff_tool, BaseAgentConfig
 from services.tool_service import tool_service
 from services.log_service import agent_logger as logger
@@ -57,7 +58,11 @@ class AgentManager:
         image_video_creator_agent = AgentManager._create_langgraph_agent(
             model, image_video_creator_config)
 
-        return [planner_agent, image_video_creator_agent]
+        pneumat_enhancer_config = PneumatEnhancerAgentConfig(tool_list)
+        pneumat_enhancer_agent = AgentManager._create_langgraph_agent(
+            model, pneumat_enhancer_config)
+
+        return [planner_agent, image_video_creator_agent, pneumat_enhancer_agent]
 
     @staticmethod
     def _create_langgraph_agent(
@@ -89,12 +94,8 @@ class AgentManager:
             if tool:
                 business_tools.append(tool)
 
-        # Add system tools (like enhance_airmold_prompt) that agent needs
-        for tool_id, tool_info in tool_service.get_all_tools().items():
-            if tool_info.get('provider') == 'system':
-                tool = tool_service.get_tool(tool_id)
-                if tool:
-                    business_tools.append(tool)
+        # Add system tools (like enhance_inflatable_prompt) that agent needs
+        business_tools.extend(tool_service.get_system_tools())
 
         return create_react_agent(
             name=config.name,

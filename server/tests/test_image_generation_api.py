@@ -48,10 +48,11 @@ class TestImageGenerationAPI:
         response = client.post('/api/upload_image')
         assert response.status_code == 422
 
-    def test_get_file_returns_404_for_missing_file(self, client):
+    def test_get_file_returns_transparent_png_for_missing_file(self, client):
         with patch('routers.image_router.os.path.exists', return_value=False):
             response = client.get('/api/file/nonexistent.jpg')
-            assert response.status_code == 404
+            assert response.status_code == 200
+            assert response.headers['content-type'] == 'image/png'
 
     def test_list_models_endpoint_accessible(self, client):
         with patch('services.config_service.config_service') as mock_config:
@@ -98,7 +99,7 @@ class TestMagicEndpoint:
                 'messages': [{'role': 'user', 'content': 'generate image'}],
                 'session_id': 'test_session',
                 'canvas_id': 'canvas_1'
-            })
+            }, headers={'Authorization': 'Bearer test_token'})
             assert response.status_code == 200
             assert response.json() == {'status': 'done'}
 
@@ -195,6 +196,6 @@ class TestImageGenerationFlow:
                 ],
                 'session_id': 'test_session_123',
                 'canvas_id': 'canvas_abc'
-            })
+            }, headers={'Authorization': 'Bearer test_token'})
             assert response.status_code == 200
             assert response.json() == {'status': 'done'}

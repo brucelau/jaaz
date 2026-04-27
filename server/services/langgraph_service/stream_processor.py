@@ -68,6 +68,8 @@ class StreamProcessor:
         else:
             await self._handle_message_chunk(chunk[1][0])
 
+
+
     async def _handle_values_chunk(self, chunk_data: Dict[str, Any]) -> None:
         """处理 values 类型的 chunk"""
         all_messages = chunk_data.get('messages', [])

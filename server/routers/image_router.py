@@ -151,7 +151,15 @@ async def get_file(file_id: str):
     file_path = os.path.join(FILES_DIR, f'{file_id}')
     logger.debug("get_file", file_path=file_path)
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="File not found")
+        # Return transparent 1x1 PNG instead of 404 for stale file references
+        from fastapi.responses import Response
+        transparent_png = (
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01'
+            b'\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89'
+            b'\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00'
+            b'\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+        )
+        return Response(content=transparent_png, media_type="image/png")
     return FileResponse(file_path)
 
 

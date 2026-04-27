@@ -53,7 +53,7 @@ class TestCreateAgents:
             )
 
             assert isinstance(result, list)
-            assert len(result) == 2  # planner + image_video_creator
+            assert len(result) == 3  # planner + image_video_creator + pneumat_enhancer
 
     def test_create_agents_filters_image_tools(self, agent_manager):
         with patch('services.langgraph_service.agent_manager.PlannerAgentConfig') as mock_planner, \

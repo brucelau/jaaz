@@ -89,6 +89,36 @@ export async function pollDeviceAuth(
   return await response.json()
 }
 
+export async function auth_register(username: string, email: string, password: string): Promise<{ token: string, user_info: UserInfo }> {
+  const response = await fetch(`${BASE_API_URL}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, email, password })
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || errorData.message || `HTTP error! status: ${response.status}`)
+  }
+
+  return await response.json()
+}
+
+export async function auth_login(username: string, password: string): Promise<{ token: string, user_info: UserInfo }> {
+  const response = await fetch(`${BASE_API_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || errorData.message || `HTTP error! status: ${response.status}`)
+  }
+
+  return await response.json()
+}
+
 export async function getAuthStatus(): Promise<AuthStatus> {
   // Get auth status from local storage
   const token = localStorage.getItem('jaaz_access_token')
@@ -102,12 +132,21 @@ export async function getAuthStatus(): Promise<AuthStatus> {
 
   if (token && userInfo) {
     try {
-      // Always try to refresh token when we have one
-      const newToken = await refreshToken(token)
-
-      // Save the new token
-      localStorage.setItem('jaaz_access_token', newToken)
-      console.log('Token refreshed successfully')
+      if (token.startsWith('local_')) {
+        const response = await fetch(`${BASE_API_URL}/api/auth/refresh-token`, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (response.ok) {
+          const data = await response.json()
+          localStorage.setItem('jaaz_access_token', data.new_token)
+          console.log('Local token refreshed successfully')
+        }
+      } else {
+        const newToken = await refreshToken(token)
+        localStorage.setItem('jaaz_access_token', newToken)
+        console.log('Token refreshed successfully')
+      }
 
       const authStatus = {
         status: 'logged_in' as const,

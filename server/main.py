@@ -1,6 +1,7 @@
 import argparse
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import socketio
 
 from core.lifespan import lifespan
@@ -11,11 +12,18 @@ from ws_manager.manager import sio
 from services.log_service import app_logger as logger
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 register_routers(app)
 setup_static_files(app)
 
-logger.info("startup", msg="creating_socketio_app")
-socket_app = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path='/socket.io')
+sio_app = socketio.ASGIApp(sio)
+app.mount("/socket.io", sio_app)
 
 if __name__ == "__main__":
     setup_proxy_bypass()
@@ -26,4 +34,4 @@ if __name__ == "__main__":
 
     import uvicorn
     logger.info("startup", msg="starting_server", port=args.port, ui_dist_dir=__import__('os').environ.get('UI_DIST_DIR'))
-    uvicorn.run(socket_app, host="127.0.0.1", port=args.port)
+    uvicorn.run(app, host="127.0.0.1", port=args.port)

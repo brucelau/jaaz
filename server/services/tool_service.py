@@ -1,6 +1,6 @@
 import os
 import traceback
-from typing import Dict
+from typing import Dict, List, Any
 from langchain_core.tools import BaseTool
 from models.tool_model import ToolInfo
 from tools.comfy_dynamic import build_tool
@@ -15,7 +15,7 @@ from tools.generate_image_by_ideogram3_bal_jaaz import (
 )
 from tools.generate_image_by_ideogram import generate_image_by_ideogram
 from tools.generate_image_by_nano_banana import generate_image_by_nano_banana
-from tools.enhance_airmold_prompt import enhance_airmold_prompt, refine_airmold_prompt, score_airmold_prompt, check_airmold_image
+from tools.enhance_inflatable_prompt import enhance_inflatable_prompt, refine_inflatable_prompt, score_inflatable_prompt, check_inflatable_image
 from services.log_service import tool_logger as logger
 
 # from tools.generate_image_by_flux_1_1_pro import generate_image_by_flux_1_1_pro
@@ -223,21 +223,21 @@ class ToolService:
                 "provider": "system",
                 "tool_function": write_plan_tool,
             }
-            self.tools["enhance_airmold_prompt"] = {
+            self.tools["enhance_inflatable_prompt"] = {
                 "provider": "system",
-                "tool_function": enhance_airmold_prompt,
+                "tool_function": enhance_inflatable_prompt,
             }
-            self.tools["refine_airmold_prompt"] = {
+            self.tools["refine_inflatable_prompt"] = {
                 "provider": "system",
-                "tool_function": refine_airmold_prompt,
+                "tool_function": refine_inflatable_prompt,
             }
-            self.tools["score_airmold_prompt"] = {
+            self.tools["score_inflatable_prompt"] = {
                 "provider": "system",
-                "tool_function": score_airmold_prompt,
+                "tool_function": score_inflatable_prompt,
             }
-            self.tools["check_airmold_image"] = {
+            self.tools["check_inflatable_image"] = {
                 "provider": "system",
-                "tool_function": check_airmold_image,
+                "tool_function": check_inflatable_image,
             }
         except ImportError as e:
             logger.error("tool_register_failed", tool="write_plan", error=str(e))
@@ -274,6 +274,13 @@ class ToolService:
 
     def remove_tool(self, tool_id: str):
         self.tools.pop(tool_id)
+
+    def get_system_tools(self) -> List[Any]:
+        return [
+            tool_info["tool_function"] 
+            for tool_info in self.tools.values() 
+            if tool_info.get("provider") == "system" and "tool_function" in tool_info
+        ]
 
     def get_all_tools(self) -> Dict[str, ToolInfo]:
         return self.tools.copy()

@@ -1,5 +1,6 @@
 import { CanvasData, Message, Session } from '@/types/types'
 import { ToolInfo } from '@/api/model'
+import { getAccessToken } from './auth'
 
 export type ListCanvasesResponse = {
   id: string
@@ -25,14 +26,22 @@ export async function createCanvas(data: {
     url: string
   }
   tool_list: ToolInfo[]
-
   system_prompt: string
 }): Promise<{ id: string }> {
+  const token = getAccessToken()
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
   const response = await fetch('/api/canvas/create', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(data),
   })
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Request failed' }))
+    throw new Error(error.detail || error.message || 'Request failed')
+  }
   return await response.json()
 }
 

@@ -3,6 +3,7 @@ from pathlib import Path
 from dataclasses import dataclass
 import os
 import toml
+import httpx
 from services.log_service import tool_logger as logger
 
 
@@ -28,28 +29,28 @@ class PromptEnhancer:
             if self.CONFIG_PATH.exists():
                 config = toml.load(self.CONFIG_PATH)
                 return config.get("nano_banana", {}).get("api_key", "") or config.get("gemini", {}).get("api_key", "")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("config_load_error", error=str(e))
         return ""
 
     def _load_template(self) -> str:
         try:
             if self.DEFAULT_TEMPLATE_PATH.exists():
                 return self.DEFAULT_TEMPLATE_PATH.read_text(encoding="utf-8")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("template_load_error", path=str(self.DEFAULT_TEMPLATE_PATH), error=str(e))
         return ""
 
     def get_template(self) -> str:
         return self._template
 
-    def enhance(self, user_input: str, feedback: Optional[List[str]] = None) -> EnhancementResult:
+    async def enhance(self, user_input: str, feedback: Optional[List[str]] = None) -> EnhancementResult:
         logger.info("enhancer_template_loaded",
             template_length=len(self._template),
             template_preview=self._template[:200]
         )
 
-        enhanced = self._enhance_with_llm(user_input, feedback)
+        enhanced = await self._enhance_with_llm(user_input, feedback)
 
         logger.info("enhancer_result",
             original_input=user_input,
@@ -63,7 +64,7 @@ class PromptEnhancer:
             enhanced_prompt=enhanced,
         )
 
-    def _enhance_with_llm(
+    async def _enhance_with_llm(
         self,
         user_input: str,
         feedback: Optional[List[str]] = None,
@@ -77,8 +78,6 @@ class PromptEnhancer:
             user_input=user_input,
             feedback_note=feedback_note
         )
-
-        import requests
 
         api_key = self.api_key
         if not api_key:
@@ -98,13 +97,26 @@ class PromptEnhancer:
             max_tokens=4000
         )
 
-        response = requests.post(url, json=payload, timeout=60)
-        if response.status_code == 200:
-            data = response.json()
-            result = data["candidates"][0]["content"]["parts"][0]["text"]
-            logger.info("gemini_enhancer_response",
-                full_response=result
-            )
-            return result.strip()
+        max_retries = 3
+        for attempt in range(max_retries):
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(url, json=payload)
+
+            logger.info("gemini_status", attempt=attempt + 1, status=response.status_code, body=response.text[:300])
+
+            if response.status_code == 200:
+                data = response.json()
+                result = data["candidates"][0]["content"]["parts"][0]["text"]
+                logger.info("gemini_enhancer_response", full_response=result)
+                return result.strip()
+
+            if response.status_code == 503 and attempt < max_retries - 1:
+                import asyncio
+                wait_time = (attempt + 1) * 2
+                logger.info("gemini_503_retry", attempt=attempt + 1, wait_seconds=wait_time)
+                await asyncio.sleep(wait_time)
+                continue
+
+            break
 
         return user_input

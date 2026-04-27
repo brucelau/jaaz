@@ -8,10 +8,10 @@
 
 | 工具 | 描述 |
 |------|------|
-| `enhance_airmold_prompt` | 增强气模设计 prompt |
-| `refine_airmold_prompt` | 基于错误反馈修正 prompt |
-| `score_airmold_prompt` | 评估 prompt 质量 |
-| `check_airmold_image` | VQA 图像质量检查 |
+| `enhance_inflatable_prompt` | 增强气模设计 prompt |
+| `refine_inflatable_prompt` | 基于错误反馈修正 prompt |
+| `score_inflatable_prompt` | 评估 prompt 质量 |
+| `check_inflatable_image` | VQA 图像质量检查 |
 
 ## 工作流程
 
@@ -35,7 +35,7 @@
     │
     ▼
 ┌─────────────────────────┐
-│  score_airmold_prompt() │  四维度评分
+│  score_inflatable_prompt() │  四维度评分
 │  - material_accuracy     │  材质准确性
 │  - structural_soundness  │  结构合理性
 │  - visual_quality        │  视觉质量
@@ -50,7 +50,7 @@
     │
     ▼
 ┌─────────────────────────┐
-│  check_airmold_image()  │  VQA 图像检查
+│  check_inflatable_image()  │  VQA 图像检查
 │  - 材质问题              │
 │  - 结构问题              │
 │  - 颜色问题              │
@@ -59,7 +59,7 @@
     │
     ▼ (如有错误)
 ┌─────────────────────────┐
-│  refine_airmold_prompt()│  错误修正
+│  refine_inflatable_prompt()│  错误修正
 └─────────────────────────┘
     │
     ▼
@@ -82,7 +82,7 @@ server/tools/
 │   │   └── enhancer_template.md  # 增强模板
 │   ├── design_patterns.json     # 气模设计规范知识库
 │   └── error_patterns.json       # 20种错误类型及修正策略
-└── enhance_airmold_prompt.py   # LangGraph 工具入口
+└── enhance_inflatable_prompt.py   # LangGraph 工具入口
 ```
 
 ## 设计规范分类

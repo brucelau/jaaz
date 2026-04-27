@@ -3,15 +3,17 @@ from typing import Dict
 from services.log_service import ws_logger as logger
 
 sio = socketio.AsyncServer(
-    cors_allowed_origins="*",
-    async_mode='asgi'
+    async_mode='asgi',
+    cors_allowed_origins='*',
+    allow_upgrades=True,
+    always_reject=False
 )
 
 active_connections: Dict[str, dict] = {}
 
 
-def add_connection(socket_id: str, user_info: dict = None):
-    active_connections[socket_id] = user_info or {}
+def add_connection(socket_id: str, user_info: dict = None, authenticated: bool = True):
+    active_connections[socket_id] = {'user_info': user_info or {}, 'authenticated': authenticated}
     logger.info("ws_connection_added", socket_id=socket_id, total=len(active_connections))
 
 

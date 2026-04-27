@@ -1,26 +1,33 @@
 #server/routers/chat_router.py
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException, Header
 from services.chat_service import handle_chat
 from services.magic_service import handle_magic
 from services.stream_service import get_stream_task
-from typing import Dict
+from typing import Dict, Optional
+import sqlite3
+from pathlib import Path
 
 router = APIRouter(prefix="/api")
 
+AUTH_DB = Path(__file__).parent.parent / "auth.db"
+
+def validate_local_token(token: str) -> bool:
+    if not token.startswith("local_"):
+        return True
+    conn = sqlite3.connect(AUTH_DB, timeout=10)
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM tokens WHERE token = ? AND expires_at > ?", (token, __import__("time").time()))
+    result = cur.fetchone()
+    conn.close()
+    return result is not None
+
 @router.post("/chat")
-async def chat(request: Request):
-    """
-    Endpoint to handle chat requests.
-
-    Receives a JSON payload from the client, passes it to the chat handler,
-    and returns a success status.
-
-    Request body:
-        JSON object containing chat data.
-
-    Response:
-        {"status": "done"}
-    """
+async def chat(request: Request, authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    token = authorization[7:]
+    if token.startswith("local_") and not validate_local_token(token):
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
     data = await request.json()
     await handle_chat(data)
     return {"status": "done"}
@@ -46,19 +53,12 @@ async def cancel_chat(session_id: str):
     return {"status": "not_found_or_done"}
 
 @router.post("/magic")
-async def magic(request: Request):
-    """
-    Endpoint to handle magic generation requests.
-
-    Receives a JSON payload from the client, passes it to the magic handler,
-    and returns a success status.
-
-    Request body:
-        JSON object containing magic generation data.
-
-    Response:
-        {"status": "done"}
-    """
+async def magic(request: Request, authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    token = authorization[7:]
+    if token.startswith("local_") and not validate_local_token(token):
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
     data = await request.json()
     await handle_magic(data)
     return {"status": "done"}

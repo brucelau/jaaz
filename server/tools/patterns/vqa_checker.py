@@ -98,7 +98,7 @@ class VQAChecker:
             with open(image_path, "rb") as f:
                 image_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={self.api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={self.api_key}"
 
             payload = {
                 "contents": [{

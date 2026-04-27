@@ -45,7 +45,7 @@ class TestChatEndpoint:
     def test_chat_returns_done_status(self, client):
         with patch('routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
-            response = client.post('/api/chat', json={'messages': []})
+            response = client.post('/api/chat', json={'messages': []}, headers={'Authorization': 'Bearer test_token'})
             assert response.status_code == 200
             assert response.json() == {'status': 'done'}
 
@@ -53,14 +53,14 @@ class TestChatEndpoint:
         with patch('routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
             data = {'messages': [{'role': 'user', 'content': 'hello'}], 'session_id': 'test'}
-            client.post('/api/chat', json=data)
+            client.post('/api/chat', json=data, headers={'Authorization': 'Bearer test_token'})
             mock_handle.assert_called_once()
 
     def test_chat_passes_data_to_handler(self, client):
         with patch('routers.chat_router.handle_chat', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
             data = {'messages': [{'role': 'user', 'content': 'hello'}], 'session_id': 'test', 'canvas_id': 'c1'}
-            client.post('/api/chat', json=data)
+            client.post('/api/chat', json=data, headers={'Authorization': 'Bearer test_token'})
             call_args = mock_handle.call_args[0][0]
             assert call_args['session_id'] == 'test'
             assert call_args['canvas_id'] == 'c1'
@@ -135,7 +135,7 @@ class TestMagicEndpoint:
     def test_magic_returns_done_status(self, client):
         with patch('routers.chat_router.handle_magic', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
-            response = client.post('/api/magic', json={'prompt': 'test'})
+            response = client.post('/api/magic', json={'prompt': 'test'}, headers={'Authorization': 'Bearer test_token'})
             assert response.status_code == 200
             assert response.json() == {'status': 'done'}
 
@@ -143,7 +143,7 @@ class TestMagicEndpoint:
         with patch('routers.chat_router.handle_magic', new_callable=AsyncMock) as mock_handle:
             mock_handle.return_value = None
             data = {'prompt': 'generate magic image', 'session_id': 'magic_1'}
-            client.post('/api/magic', json=data)
+            client.post('/api/magic', json=data, headers={'Authorization': 'Bearer test_token'})
             mock_handle.assert_called_once()
 
 
