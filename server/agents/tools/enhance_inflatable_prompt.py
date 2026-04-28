@@ -56,6 +56,8 @@ class CheckImageInputSchema(BaseModel):
     )
 
 
+from web.websocket.emitter import send_to_websocket, broadcast_session_update
+
 @tool("enhance_inflatable_prompt",
       description="增强充气装饰设计 prompt。当用户描述充气装饰设计需求时使用此工具，可以将简单的用户描述转化为专业的图像生成 prompt。此工具基于充气装饰设计知识库进行增强，结合 LLM 评分反馈迭代优化（最多3次），确保生成的 prompt 质量达标。",
       args_schema=EnhancePromptInputSchema)
@@ -66,6 +68,7 @@ async def enhance_inflatable_prompt(
 ) -> str:
     ctx = config.get('configurable', {})
     api_key = ctx.get('api_key', None)
+    session_id = ctx.get('session_id', '')
 
     if api_key:
         enhancer = PromptEnhancer(api_key=api_key)
@@ -77,6 +80,12 @@ async def enhance_inflatable_prompt(
         has_feedback=error_feedback is not None,
         feedback_count=len(error_feedback) if error_feedback else 0
     )
+    
+    if session_id:
+        await send_to_websocket(session_id, {
+            "type": "info",
+            "message": "正在基于知识库增强设计需求..."
+        })
 
     scorer = get_scorer()
 
@@ -90,11 +99,23 @@ async def enhance_inflatable_prompt(
         feedback = all_feedback[-1:] if attempt > 0 and all_feedback else None
 
         logger.info("attempt", attempt=attempt + 1, step="generating_candidate")
+        if session_id:
+            await send_to_websocket(session_id, {
+                "type": "info",
+                "message": f"正在优化提示词 (第 {attempt + 1} 次尝试)..."
+            })
+        
         result = await enhancer.enhance(user_input, feedback=feedback)
         candidate = result.enhanced_prompt
         logger.debug("attempt", attempt=attempt + 1, step="candidate_generated", candidate=f"{candidate[:100]}...")
 
         logger.info("attempt", attempt=attempt + 1, step="calling_selene")
+        if session_id:
+            await send_to_websocket(session_id, {
+                "type": "info",
+                "message": "正在评估提示词质量..."
+            })
+        
         eval_result = await scorer.evaluate_with_feedback(candidate, feedback)
         score = eval_result["score"]
 

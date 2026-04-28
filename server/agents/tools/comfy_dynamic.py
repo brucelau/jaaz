@@ -63,11 +63,14 @@ def _build_input_schema(wf: Dict[str, Any]) -> type[BaseModel]:
     The `inputs` column is stored in DB as JSON text -> parse first.
     """
     try:
-        input_defs: List[Dict[str, Any]] = (
-            wf["inputs"] if isinstance(wf["inputs"], list) else json.loads(wf["inputs"])
-        )
+        raw_inputs = wf.get("inputs")
+        if isinstance(raw_inputs, list):
+            input_defs = raw_inputs
+        elif isinstance(raw_inputs, dict):
+            input_defs = []
+        else:
+            input_defs = json.loads(raw_inputs) if raw_inputs else []
     except Exception:
-        # fall back to empty model if bad schema
         input_defs = []
 
     fields: Dict[str, tuple] = {}
@@ -99,12 +102,22 @@ def _build_input_schema(wf: Dict[str, Any]) -> type[BaseModel]:
     return create_model(model_name, __base__=BaseModel, **fields)
 
 
+def sanitize_tool_name(name: str) -> str:
+    import re
+    sanitized = re.sub(r'[^a-zA-Z0-9_.:-]', '_', name)
+    if not re.match(r'^[a-zA-Z_]', sanitized):
+        sanitized = '_' + sanitized
+    return sanitized[:64]
+
+
 def build_tool(wf: Dict[str, Any]) -> BaseTool:
     """Return an @tool function for the given workflow record."""
     input_schema = _build_input_schema(wf)
+    
+    tool_name = sanitize_tool_name(wf["name"])
 
     @tool(
-        wf["name"],
+        tool_name,
         description=wf.get("description") or f"Run ComfyUI workflow {wf['id']}",
         args_schema=input_schema,
     )

@@ -31,11 +31,11 @@ async def auth_login(req: LoginRequest):
 @router.get("/refresh-token")
 async def auth_refresh_token(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
+        return {"valid": False}
 
     token = authorization[7:]
     result = refresh_token(token)
     if result["status"] == "error":
-        raise HTTPException(status_code=401, detail=result["message"])
+        return {"valid": False}
 
-    return {"new_token": result["new_token"]}
+    return {"valid": True, "new_token": result["new_token"]}

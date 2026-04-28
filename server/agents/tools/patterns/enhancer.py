@@ -22,6 +22,7 @@ class PromptEnhancer:
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or self._load_api_key()
+        self._max_tokens = self._load_max_tokens()
         self._template = self._load_template()
 
     def _load_api_key(self) -> str:
@@ -32,6 +33,15 @@ class PromptEnhancer:
         except Exception as e:
             logger.warning("config_load_error", error=str(e))
         return ""
+
+    def _load_max_tokens(self) -> int:
+        try:
+            if self.CONFIG_PATH.exists():
+                config = toml.load(self.CONFIG_PATH)
+                return config.get("gemini", {}).get("enhancer_max_tokens", 8192)
+        except Exception as e:
+            logger.warning("config_load_error", error=str(e))
+        return 8192
 
     def _load_template(self) -> str:
         try:
@@ -87,14 +97,14 @@ class PromptEnhancer:
 
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 4000}
+            "generationConfig": {"temperature": 0.7, "maxOutputTokens": self._max_tokens}
         }
 
         logger.info("gemini_enhancer_request",
             user_input=user_input,
             prompt_to_gemini=prompt,
             temperature=0.7,
-            max_tokens=4000
+            max_tokens=self._max_tokens
         )
 
         max_retries = 3

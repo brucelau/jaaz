@@ -139,8 +139,16 @@ export async function getAuthStatus(): Promise<AuthStatus> {
         })
         if (response.ok) {
           const data = await response.json()
-          localStorage.setItem('jaaz_access_token', data.new_token)
-          console.log('Local token refreshed successfully')
+          if (data.valid === false) {
+            localStorage.removeItem('jaaz_access_token')
+            localStorage.removeItem('jaaz_user_info')
+            const loggedOutStatus = { status: 'logged_out' as const, is_logged_in: false }
+            return loggedOutStatus
+          }
+          if (data.new_token) {
+            localStorage.setItem('jaaz_access_token', data.new_token)
+            console.log('Local token refreshed successfully')
+          }
         }
       } else {
         const newToken = await refreshToken(token)

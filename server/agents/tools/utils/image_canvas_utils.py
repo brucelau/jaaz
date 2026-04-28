@@ -12,6 +12,7 @@ from typing import Dict, List, Any, Optional, Union, cast
 from nanoid import generate
 from database.db_service import db_service
 from web.websocket.emitter import broadcast_session_update, send_to_websocket
+from web.services.log_service import tool_logger as logger
 from agents.tools.utils.canvas import find_next_best_element_position
 
 def generate_file_id() -> str:
@@ -135,6 +136,7 @@ async def save_image_to_canvas(session_id: str, canvas_id: str, filename: str, m
 
         # Save the updated canvas data back to the database
         await db_service.save_canvas_data(canvas_id, json.dumps(canvas_data))
+        logger.info("canvas_data_saved", canvas_id=canvas_id)
 
         # Broadcast image generation message to frontend
         await broadcast_session_update(session_id, canvas_id, {
@@ -143,6 +145,7 @@ async def save_image_to_canvas(session_id: str, canvas_id: str, filename: str, m
             'file': file_data,
             'image_url': image_url,
         })
+        logger.info("image_generated_broadcasted", session_id=session_id)
 
         return image_url
 

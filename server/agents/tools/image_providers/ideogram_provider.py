@@ -14,7 +14,9 @@ class IdeogramProvider(ImageProviderBase):
     """Ideogram image generation provider implementation"""
 
     def __init__(self):
-        self.api_url = "https://api.ideogram.ai/v1/ideogram-v3/generate"
+        config = config_service.app_config.get('ideogram', {})
+        self.api_url = config.get("url", "https://api.ideogram.ai/v1/ideogram-v3/generate")
+        self.model = config.get("model", "ideogram-v3")
         self.max_retries = 3
         self.retry_delay = 2
 
@@ -48,7 +50,7 @@ class IdeogramProvider(ImageProviderBase):
                 "prompt": prompt,
                 "aspect_ratio": self._map_aspect_ratio(aspect_ratio),
                 "style_type": "REALISTIC",
-                "model": "V_2"
+                "model": self.model
             }
             headers = {"Api-Key": self.api_key}
 
@@ -58,11 +60,7 @@ class IdeogramProvider(ImageProviderBase):
                 result = response.json()
                 if "data" in result and len(result["data"]) > 0:
                     image_url = result["data"][0].get("url")
-                    image_id = generate_image_id()
-                    mime_type, width, height, extension = asyncio.run(
-                        get_image_info_and_save(image_url, os.path.join(FILES_DIR, f'{image_id}'))
-                    )
-                    return mime_type, width, height, f'{image_id}.{extension}'
+                    return image_url
 
             if response.status_code == 429:
                 raise Exception("Ideogram rate limit exceeded")
@@ -70,8 +68,12 @@ class IdeogramProvider(ImageProviderBase):
             raise Exception(f"Ideogram API error: HTTP {response.status_code}: {response.text[:200]}")
 
         try:
-            mime_type, width, height, filename = await asyncio.to_thread(_call_api)
-            return mime_type, width, height, filename
+            image_url = await asyncio.to_thread(_call_api)
+            image_id = generate_image_id()
+            mime_type, width, height, extension = await get_image_info_and_save(
+                image_url, os.path.join(FILES_DIR, f'{image_id}')
+            )
+            return mime_type, width, height, f'{image_id}.{extension}'
         except Exception as e:
             logger.error("ideogram_error", error=str(e))
             traceback.print_exc()

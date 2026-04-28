@@ -19,16 +19,14 @@ export function LoginDialog() {
 
   const { refreshAuth, authStatus, isLoading } = useAuth()
   const { showLoginDialog: open, setShowLoginDialog } = useConfigs()
-
-  if (isLoading || authStatus.is_logged_in) {
-    return null
-  }
-
   const refreshModels = useRefreshModels()
   const { t } = useTranslation()
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  const shouldRender = !isLoading && !authStatus.is_logged_in
+
   useEffect(() => {
+    if (!shouldRender) return
     setAuthMessage('')
     setUsername('')
     setEmail('')
@@ -41,15 +39,16 @@ export function LoginDialog() {
         pollingIntervalRef.current = null
       }
     }
-  }, [open])
+  }, [open, shouldRender])
 
   useEffect(() => {
+    if (!shouldRender) return
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current)
       }
     }
-  }, [])
+  }, [shouldRender])
 
   const handleSuccess = async (token: string, user_info: any) => {
     saveAuthData(token, user_info)
@@ -158,7 +157,7 @@ export function LoginDialog() {
     }
   }
 
-  return (
+  return shouldRender ? (
     <Dialog open={open} onOpenChange={setShowLoginDialog}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -277,5 +276,5 @@ export function LoginDialog() {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  ) : null
 }

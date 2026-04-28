@@ -13,11 +13,13 @@ from web.services.log_service import tool_logger as logger
 
 
 class NanoBananaProvider(ImageProviderBase):
-    """Nano Banana (Gemini Flash Image) provider implementation"""
+    """Nano Banana (Imagen) provider implementation"""
 
     def __init__(self):
-        self.model = "gemini-3.1-flash-image-preview"
-        self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        config = config_service.app_config.get('nano_banana', {})
+        model = config.get("model", "imagen-4.0-generate-001")
+        base_url = config.get("url", "https://generativelanguage.googleapis.com/v1beta/models")
+        self.api_url = f"{base_url}/{model}:predict"
 
     async def generate(
         self,
@@ -28,7 +30,7 @@ class NanoBananaProvider(ImageProviderBase):
         **kwargs: Any
     ) -> Tuple[str, int, int, str]:
         """
-        Generate image using Nano Banana (Gemini Flash Image) API
+        Generate image using Imagen API
 
         Returns:
             Tuple[str, int, int, str]: (mime_type, width, height, filename)
@@ -45,10 +47,22 @@ class NanoBananaProvider(ImageProviderBase):
                 raise ValueError("Nano Banana API key is not configured")
 
         def _call_api():
+            aspect_map = {
+                "1:1": "1:1",
+                "16:9": "16:9",
+                "4:3": "4:3",
+                "3:4": "3:4",
+                "9:16": "9:16",
+            }
+            target_aspect = aspect_map.get(aspect_ratio, "1:1")
+
             url = f"{self.api_url}?key={self.api_key}"
             payload = {
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": 0.9, "topP": 1, "maxOutputTokens": 2048}
+                "instances": [{"prompt": prompt}],
+                "parameters": {
+                    "aspectRatio": target_aspect,
+                    "sampleCount": 1,
+                }
             }
 
             max_retries = 3
@@ -60,15 +74,16 @@ class NanoBananaProvider(ImageProviderBase):
                         url,
                         headers={"Content-Type": "application/json"},
                         json=payload,
-                        timeout=180
+                        timeout=60
                     )
 
                     if response.status_code == 200:
                         result = response.json()
 
-                        for part in result.get("candidates", [{}])[0].get("content", {}).get("parts", []):
-                            if "inlineData" in part:
-                                img_data = base64.b64decode(part["inlineData"]["data"])
+                        if "predictions" in result and len(result["predictions"]) > 0:
+                            prediction = result["predictions"][0]
+                            if "bytesBase64Encoded" in prediction:
+                                img_data = base64.b64decode(prediction["bytesBase64Encoded"])
                                 image_id = generate_image_id()
                                 image_path = os.path.join(FILES_DIR, f'{image_id}.png')
 
@@ -78,7 +93,7 @@ class NanoBananaProvider(ImageProviderBase):
 
                                 return "image/png", width, height, f'{image_id}.png'
 
-                        raise Exception("No image in Nano Banana response")
+                        raise Exception("No image in Imagen response")
 
                     last_error = f"HTTP {response.status_code}: {response.text[:200]}"
                 except requests.exceptions.Timeout:

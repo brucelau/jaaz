@@ -32,6 +32,10 @@ Discreet modular grid lines and data glyphs fade into matte charcoal background,
 – Tagline: thin italic grotesque.
 – Secondary copy: 10 pt monospaced to reference code.
 
-2. Call generate_image tool to generate the image based on the plan immediately, use a detailed and professional image prompt according to your design strategy plan, no need to ask for user's approval.
+2. Call the appropriate image generation tool (e.g. generate_image_by_ideogram or generate_image_by_nano_banana) to generate the image based on the plan immediately, use a detailed and professional image prompt according to your design strategy plan, no need to ask for user's approval.
+IMPORTANT: Always provide the required `aspect_ratio` argument (default to 1:1 if unsure). 
+Choose the best fitting aspect ratio according to the prompt (e.g. 16:9 for landscapes, 9:16 for portraits). 
+Best ratio for posters is 3:4.
+Allowed values: 1:1, 16:9, 4:3, 3:4, 9:16.
 
 3. If it is a video generation task, use video generation tools to generate the video. You can choose to generate the necessary images first, and then use the images to generate the video, or directly generate the video using text prompt.

@@ -35,6 +35,8 @@ IMAGE_PROVIDERS: dict[str, ImageProviderBase] = {
 }
 
 
+from web.websocket.emitter import send_to_websocket, broadcast_session_update
+
 async def generate_image_with_provider(
     canvas_id: str,
     session_id: str,
@@ -45,22 +47,13 @@ async def generate_image_with_provider(
     aspect_ratio: str = "1:1",
     input_images: Optional[list[str]] = None,
 ) -> str:
-    """
-    通用图像生成函数，支持不同的模型和提供商
-
-    Args:
-        prompt: 图像生成提示词
-        aspect_ratio: 图像长宽比
-        model_name: 内部模型名称 (如 'gpt-image-1', 'imagen-4')
-        model: 模型标识符 (如 'openai/gpt-image-1', 'google/imagen-4')
-        tool_call_id: 工具调用ID
-        config: 上下文运行配置，包含canvas_id，session_id，model_info，由langgraph注入
-        input_images: 可选的输入参考图像列表
-
-    Returns:
-        str: 生成结果消息
-    """
-
+    logger.info("image_generation_start", provider=provider, model=model, aspect_ratio=aspect_ratio, prompt=prompt[:100])
+    
+    if session_id:
+        await send_to_websocket(session_id, {
+            "type": "info",
+            "message": f"正在使用 {provider} 生成图像..."
+        })
     provider_instance = IMAGE_PROVIDERS.get(provider)
     if not provider_instance:
         raise ValueError(f"Unknown provider: {provider}")

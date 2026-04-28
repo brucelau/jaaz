@@ -10,7 +10,8 @@ class GenerateImageByIdeogramInputSchema(BaseModel):
         description="Required. The prompt for image generation. If you want to edit an image, please describe what you want to edit in the prompt."
     )
     aspect_ratio: str = Field(
-        description="Required. Aspect ratio of the image, only these values are allowed: 1:1, 16:9, 4:3, 3:4, 9:16. Choose the best fitting aspect ratio according to the prompt. Best ratio for posters is 3:4"
+        default="1:1",
+        description="Optional. Aspect ratio of the image, only these values are allowed: 1:1, 16:9, 4:3, 3:4, 9:16. Choose the best fitting aspect ratio according to the prompt. Best ratio for posters is 3:4"
     )
     tool_call_id: Annotated[str, InjectedToolCallId]
 
