@@ -69,6 +69,12 @@ class ConnectionPool:
         finally:
             await self.release(conn)
 
+    async def begin_transaction(self) -> aiosqlite.Connection:
+        """Begin a transaction, returns connection with manual commit/rollback required."""
+        conn = await self.acquire()
+        await conn.execute("BEGIN")
+        return conn
+
     async def close(self):
         await self.close_all()
 
@@ -82,6 +88,32 @@ async def get_db_pool() -> ConnectionPool:
         _db_pool = ConnectionPool(DB_PATH, min_connections=1, max_connections=5)
         await _db_pool.initialize()
     return _db_pool
+
+
+class TransactionHelper:
+    """事务辅助类，用于跨表操作的原子性"""
+    def __init__(self, pool: ConnectionPool):
+        self.pool = pool
+        self.conn: Optional[aiosqlite.Connection] = None
+
+    async def __aenter__(self) -> aiosqlite.Connection:
+        self.conn = await self.pool.begin_transaction()
+        return self.conn
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.conn:
+            if exc_type:
+                await self.conn.rollback()
+            else:
+                await self.conn.commit()
+            await self.pool.release(self.conn)
+        return False
+
+
+async def with_transaction():
+    """异步上下文管理器，用于事务操作"""
+    pool = await get_db_pool()
+    return TransactionHelper(pool)
 
 
 class DatabaseService:
@@ -158,6 +190,28 @@ class DatabaseService:
             VALUES (?, ?, ?)
         """, (session_id, role, message))
         await pool.commit_and_release(conn)
+
+    async def create_chat_session_and_message(
+        self,
+        session_id: str,
+        model: str,
+        provider: str,
+        canvas_id: str,
+        role: str,
+        message: str,
+        title: Optional[str] = None
+    ):
+        """原子操作：创建聊天会话和首条消息"""
+        pool = await get_db_pool()
+        async with TransactionHelper(pool) as conn:
+            await conn.execute("""
+                INSERT INTO chat_sessions (id, model, provider, canvas_id, title)
+                VALUES (?, ?, ?, ?, ?)
+            """, (session_id, model, provider, canvas_id, title))
+            await conn.execute("""
+                INSERT INTO chat_messages (session_id, role, message)
+                VALUES (?, ?, ?)
+            """, (session_id, role, message))
 
     async def get_chat_history(self, session_id: str) -> List[Dict[str, Any]]:
         pool = await get_db_pool()

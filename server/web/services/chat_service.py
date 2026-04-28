@@ -42,14 +42,19 @@ async def handle_chat(data: Dict[str, Any]) -> None:
     # TODO: save and fetch system prompt from db or settings config
     system_prompt: Optional[str] = data.get('system_prompt')
 
-    # If there is only one message, create a new chat session
     if len(messages) == 1:
-        # create new session
         prompt = messages[0].get('content', '')
-        # TODO: Better way to determin when to create new chat session.
-        await db_service.create_chat_session(session_id, text_model.get('model'), text_model.get('provider'), canvas_id, (prompt[:200] if isinstance(prompt, str) else ''))
-
-    await db_service.create_message(session_id, messages[-1].get('role', 'user'), json.dumps(messages[-1])) if len(messages) > 0 else None
+        await db_service.create_chat_session_and_message(
+            session_id,
+            text_model.get('model'),
+            text_model.get('provider'),
+            canvas_id,
+            messages[-1].get('role', 'user'),
+            json.dumps(messages[-1]),
+            prompt[:200] if isinstance(prompt, str) else ''
+        )
+    elif len(messages) > 0:
+        await db_service.create_message(session_id, messages[-1].get('role', 'user'), json.dumps(messages[-1]))
 
     # Create and start langgraph_agent task for chat processing
     task = asyncio.create_task(langgraph_multi_agent(

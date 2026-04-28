@@ -7,10 +7,12 @@ from typing import Optional
 
 import os
 from web.services.config_service import DB_DIR
+from core.constants import DEFAULT_TIMEOUT_SECONDS, TOKEN_EXPIRY_SECONDS
+
 DB_PATH = os.path.join(DB_DIR, "localmanus.db")
 
 def _get_db():
-    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn = sqlite3.connect(DB_PATH, timeout=DEFAULT_TIMEOUT_SECONDS)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -109,7 +111,7 @@ def refresh_token(token: str) -> dict:
             conn.commit()
             return {"status": "error", "message": "Token expired"}
 
-        cur.execute("DELETE FROM tokens WHERE token = ?", (token,))
+        cur.execute("DELETE FROM auth_tokens WHERE token = ?", (token,))
         conn.commit()
 
         user_id = row["user_id"]
@@ -130,7 +132,7 @@ def refresh_token(token: str) -> dict:
 def _generate_token(user_id: str) -> str:
     token = f"local_{uuid.uuid4().hex}"
     created_at = time.time()
-    expires_at = created_at + 7 * 24 * 3600
+    expires_at = created_at + TOKEN_EXPIRY_SECONDS
 
     with _get_db() as conn:
         cur = conn.cursor()

@@ -23,6 +23,7 @@ Settings Service - 设置服务模块
 import os
 import traceback
 import json
+import aiofiles
 from web.services.log_service import app_logger as logger
 
 # Config directory - all config files live here
@@ -272,32 +273,26 @@ class SettingsService:
             })
         """
         try:
-            # 加载现有设置，如果文件不存在则使用默认设置
             existing_settings = DEFAULT_SETTINGS.copy()
             if os.path.exists(self.settings_file):
                 try:
-                    with open(self.settings_file, 'r', encoding='utf-8') as f:
-                        existing_settings = json.load(f)
+                    async with aiofiles.open(self.settings_file, 'r', encoding='utf-8') as f:
+                        content = await f.read()
+                        existing_settings = json.loads(content)
                 except Exception as e:
                     logger.error("error_reading_existing_settings", error=str(e))
 
-            # 合并新数据到现有设置
             for key, value in data.items():
                 if key in existing_settings and isinstance(existing_settings[key], dict) and isinstance(value, dict):
-                    # 对于字典类型，进行深度合并而不是替换
                     existing_settings[key].update(value)
                 else:
-                    # 其他类型直接覆盖
                     existing_settings[key] = value
 
-            # 确保目录存在
             os.makedirs(os.path.dirname(self.settings_file), exist_ok=True)
 
-            # 保存更新后的设置到文件
-            with open(self.settings_file, 'w', encoding='utf-8') as f:
-                json.dump(existing_settings, f, indent=2)
+            async with aiofiles.open(self.settings_file, 'w', encoding='utf-8') as f:
+                await f.write(json.dumps(existing_settings, indent=2))
 
-            # 更新全局设置缓存
             global app_settings
             app_settings = existing_settings
 

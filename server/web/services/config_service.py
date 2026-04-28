@@ -112,8 +112,8 @@ class ConfigService:
             # Check if config file exists
             if not self.exists_config():
                 logger.info("config_not_found", path=self.config_file, msg="creating_default")
-                with open(self.config_file, "w") as f:
-                    toml.dump(self.app_config, f)
+                async with aiofiles.open(self.config_file, "w") as f:
+                    await f.write(toml.dumps(self.app_config))
                 logger.info("config_created", path=self.config_file)
                 self.initialized = True
                 return
@@ -155,8 +155,8 @@ class ConfigService:
                 data['jaaz']['url'] = self._get_jaaz_url()
 
             os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
-            with open(self.config_file, "w") as f:
-                toml.dump(data, f)
+            async with aiofiles.open(self.config_file, "w") as f:
+                await f.write(toml.dumps(data))
             self.app_config = data
 
             return {
