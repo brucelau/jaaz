@@ -2,14 +2,14 @@
 
 ## 一、项目概述
 
-Jaaz 后端是一个基于 **Python FastAPI** 构建的 AI 设计 Agent 服务端，提供：
+James 后端是一个基于 **Python FastAPI** 构建的 AI 设计 Agent 服务端，提供：
 - RESTful API 接口
 - Socket.IO 实时通信
 - LangGraph 多 Agent 编排
 - 多 Provider 图片/视频生成
 - 本地 SQLite 数据库
 
-**项目路径**: `/Users/cyberway/ocworkspace/jaaz/server`
+**项目路径**: `/Users/cyberway/ocworkspace/James/server`
 
 ### 核心功能
 - 🎨 **图片生成** - Flux, Ideogram, Midjourney, DALL-E 等
@@ -98,7 +98,7 @@ Jaaz 后端是一个基于 **Python FastAPI** 构建的 AI 设计 Agent 服务�
 
 ## 四、启动入口
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/main.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/main.py`
 
 ```python
 # 启动命令

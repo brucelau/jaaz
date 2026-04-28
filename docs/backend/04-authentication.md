@@ -99,7 +99,7 @@ def refresh_token(token: str):
 
 ## Token 验证 (WebSocket)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/websocket/handlers.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/websocket/handlers.py`
 
 ```python
 async def connect(sid, environ, auth):

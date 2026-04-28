@@ -1,4 +1,4 @@
-# Jaaz 后端优化与重构建议
+# James 后端优化与重构建议
 
 **日期**: 2026-04-28
 
@@ -26,10 +26,10 @@
 - ✅ `providers.py` → TOOL_MAPPING
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/tool_service.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/tool_registry.py` (新增)
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/tool_loader.py` (新增)
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/providers.py` (新增)
+- `/Users/cyberway/ocworkspace/James/server/web/services/tool_service.py`
+- `/Users/cyberway/ocworkspace/James/server/agents/tool_registry.py` (新增)
+- `/Users/cyberway/ocworkspace/James/server/agents/tool_loader.py` (新增)
+- `/Users/cyberway/ocworkspace/James/server/agents/providers.py` (新增)
 
 **工作量**: 已完成核心重构
 
@@ -59,8 +59,8 @@ agents:
 ```
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/langgraph_service/agent_manager.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/langgraph_service/configs/*.py`
+- `/Users/cyberway/ocworkspace/James/server/agents/langgraph_service/agent_manager.py`
+- `/Users/cyberway/ocworkspace/James/server/agents/langgraph_service/configs/*.py`
 
 **工作量**: 中等，需要新增配置文件和工厂类
 
@@ -106,8 +106,8 @@ async def create_chat_session_and_message(self, session_id, model, provider, can
 - `chat_service.py` - 使用原子操作替代分离的两次调用
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/database/db_service.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/chat_service.py`
+- `/Users/cyberway/ocworkspace/James/server/database/db_service.py`
+- `/Users/cyberway/ocworkspace/James/server/web/services/chat_service.py`
 
 ---
 
@@ -136,8 +136,8 @@ async with aiofiles.open(self.settings_file, 'w', encoding='utf-8') as f:
 **未完成**: `get_settings()` 和 `get_raw_settings()` 仍是同步方法，需要更大范围重构
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/config_service.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/database/settings_service.py`
+- `/Users/cyberway/ocworkspace/James/server/web/services/config_service.py`
+- `/Users/cyberway/ocworkspace/James/server/database/settings_service.py`
 
 **工作量**: 低，已完成核心写操作改造
 
@@ -159,7 +159,7 @@ max_connections = int(os.getenv("DB_POOL_SIZE", "10"))
 ```
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/database/db_service.py`
+- `/Users/cyberway/ocworkspace/James/server/database/db_service.py`
 
 **工作量**: 低，仅 1 处修改
 
@@ -187,8 +187,8 @@ def validate_local_token_cached(token):
 ```
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/auth_service.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/web/websocket/handlers.py`
+- `/Users/cyberway/ocworkspace/James/server/web/services/auth_service.py`
+- `/Users/cyberway/ocworkspace/James/server/web/websocket/handlers.py`
 
 **工作量**: 中等，需要引入缓存层
 
@@ -214,8 +214,8 @@ sio = socketio.AsyncServer(cors_allowed_origins=ALLOWED_ORIGINS)
 ```
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/main.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/web/websocket/manager.py`
+- `/Users/cyberway/ocworkspace/James/server/main.py`
+- `/Users/cyberway/ocworkspace/James/server/web/websocket/manager.py`
 
 **工作量**: 低，但影响范围广
 
@@ -237,7 +237,7 @@ bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))
 ```
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/auth_service.py`
+- `/Users/cyberway/ocworkspace/James/server/web/services/auth_service.py`
 
 **工作量**: 低，仅 1 处修改
 
@@ -259,9 +259,9 @@ logger.info(f"API key prefix: {api_key[:4]}***")
 ```
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/tool_service.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/config_service.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/jaaz_service.py`
+- `/Users/cyberway/ocworkspace/James/server/web/services/tool_service.py`
+- `/Users/cyberway/ocworkspace/James/server/web/services/config_service.py`
+- `/Users/cyberway/ocworkspace/James/server/web/services/James_service.py`
 
 **工作量**: 低，需要审计所有日志语句
 
@@ -297,7 +297,7 @@ def get_config() -> dict[str, ProviderConfig]:
 **问题**: 硬编码的值散布在代码中。
 
 **已创建**:
-- `/Users/cyberway/ocworkspace/jaaz/server/core/constants.py`
+- `/Users/cyberway/ocworkspace/James/server/core/constants.py`
 
 **已提取常量**:
 ```python
@@ -378,8 +378,8 @@ def get_provider(name: str) -> BaseProvider:
 ```
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/tools/utils/image_generation_core.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/tools/utils/video_generation_core.py`
+- `/Users/cyberway/ocworkspace/James/server/agents/tools/utils/image_generation_core.py`
+- `/Users/cyberway/ocworkspace/James/server/agents/tools/utils/video_generation_core.py`
 
 **工作量**: 中等，需要重构 Provider 加载逻辑
 
@@ -399,8 +399,8 @@ for plugin in Path("tools/plugins").glob("*_plugin.py"):
 ```
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/web/services/tool_service.py`
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/tools/`
+- `/Users/cyberway/ocworkspace/James/server/web/services/tool_service.py`
+- `/Users/cyberway/ocworkspace/James/server/agents/tools/`
 
 **工作量**: 中等
 
@@ -415,7 +415,7 @@ for plugin in Path("tools/plugins").glob("*_plugin.py"):
 **说明**: 当前每个 Agent Config 初始化参数不同（如 `PlannerAgentConfig()` 无参数，`ImageVideoCreatorAgentConfig(tool_list)` 需要 tool_list），工厂模式需要更复杂的注册机制。评估后认为当前架构已足够清晰，暂不重构。
 
 **涉及文件**:
-- `/Users/cyberway/ocworkspace/jaaz/server/agents/langgraph_service/agent_manager.py`
+- `/Users/cyberway/ocworkspace/James/server/agents/langgraph_service/agent_manager.py`
 
 **工作量**: 中等（暂不实施）
 

@@ -1,4 +1,4 @@
-# Jaaz 后端代码文档
+# James 后端代码文档
 
 ## 文档索引
 
@@ -35,7 +35,7 @@
 ## 启动方式
 
 ```bash
-cd jaaz/server
+cd James/server
 pip install -r requirements.txt
 python main.py --port 57988
 ```

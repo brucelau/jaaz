@@ -15,7 +15,7 @@
 ## 配置目录
 
 ```python
-SERVER_DIR = <jaaz>/server
+SERVER_DIR = <James>/server
 CONFIG_DIR = <SERVER_DIR>/config
 CONFIG_FILE = <CONFIG_DIR>/config.toml
 DB_DIR = <SERVER_DIR>/database
@@ -25,7 +25,7 @@ FILES_DIR = <CONFIG_DIR>/files
 
 ## config.toml (Provider 配置)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/services/config_service.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/services/config_service.py`
 
 ### 默认 Provider 配置
 
@@ -63,9 +63,9 @@ DEFAULT_PROVIDERS_CONFIG = {
 ### config.toml 格式
 
 ```toml
-[jaaz]
+[James]
 api_key = "xxx"
-base_url = "https://api.jaaz.app"
+base_url = "https://api.James.app"
 
 [openai]
 api_key = "sk-xxx"
@@ -78,7 +78,7 @@ base_url = "http://127.0.0.1:8188"
 
 ## ConfigService
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/services/config_service.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/services/config_service.py`
 
 ```python
 class ConfigService:
@@ -134,7 +134,7 @@ BASE_API_URL = os.getenv("BASE_API_URL", "http://127.0.0.1:57988")
 
 ## 设置 (settings.json)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/database/settings_service.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/database/settings_service.py`
 
 ### 存储位置
 
@@ -176,7 +176,7 @@ class SettingsService:
 
 ## 生命周期初始化
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/core/lifespan.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/core/lifespan.py`
 
 ```python
 @asynccontextmanager

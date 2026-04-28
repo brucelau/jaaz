@@ -44,7 +44,7 @@
 
 ## Socket.IO 挂载
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/main.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/main.py`
 
 ```python
 import socketio
@@ -59,7 +59,7 @@ app.mount("/socket.io", sio_app)
 
 ## Server 配置
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/websocket/manager.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/websocket/manager.py`
 
 ```python
 sio = socketio.AsyncServer(
@@ -72,7 +72,7 @@ sio = socketio.AsyncServer(
 
 ## 事件处理器
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/websocket/handlers.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/websocket/handlers.py`
 
 ### connect
 
@@ -139,7 +139,7 @@ async def ping(sid, data):
 
 ## 广播辅助
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/websocket/emitter.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/websocket/emitter.py`
 
 ### 广播 session_update
 

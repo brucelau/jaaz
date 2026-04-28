@@ -170,7 +170,7 @@ react/src/
 │   │   ├── canvas.css         # Canvas 样式
 │   │   ├── animations.css     # 动画
 │   │   └── shiny-text.css     # 闪光文字样式
-│   └── jaaz.png               # Logo
+│   └── James.png               # Logo
 │
 └── index.d.ts                 # 全局类型声明 (Electron API)
 ```

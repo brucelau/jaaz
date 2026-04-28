@@ -6,7 +6,7 @@
 
 ## 路由注册中心
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/core/routers.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/core/routers.py`
 
 ```python
 def register_routers(app):
@@ -26,7 +26,7 @@ def register_routers(app):
 
 ## 1. 认证路由 (auth_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/auth_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/auth_router.py`
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
@@ -86,7 +86,7 @@ def register_routers(app):
 
 ## 2. 根路由 (root_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/root_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/root_router.py`
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -116,7 +116,7 @@ def register_routers(app):
 ```json
 [
   {
-    "provider": "jaaz",
+    "provider": "James",
     "id": "generate_image",
     "display_name": "Generate Image",
     "type": "image"
@@ -128,7 +128,7 @@ def register_routers(app):
 
 ## 3. Canvas 路由 (canvas_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/canvas_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/canvas_router.py`
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
@@ -168,7 +168,7 @@ def register_routers(app):
 
 ## 4. 聊天路由 (chat_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/chat_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/chat_router.py`
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
@@ -206,7 +206,7 @@ def register_routers(app):
 
 ## 5. 图片路由 (image_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/image_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/image_router.py`
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -234,7 +234,7 @@ def register_routers(app):
 
 ## 6. 工作区路由 (workspace_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/workspace_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/workspace_router.py`
 
 文件系统操作相关接口：
 
@@ -257,7 +257,7 @@ def register_routers(app):
 
 ## 7. 设置路由 (settings_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/settings_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/settings_router.py`
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -278,7 +278,7 @@ def register_routers(app):
 
 ## 8. 配置路由 (config_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/config_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/config_router.py`
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -304,7 +304,7 @@ def register_routers(app):
 
 ## 9. 工具确认路由 (tool_confirmation_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/tool_confirmation_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/tool_confirmation_router.py`
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -325,7 +325,7 @@ def register_routers(app):
 
 ## 10. SSL 测试路由 (ssl_test_router.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/ssl_test_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/ssl_test_router.py`
 
 | 方法 | 路径 | 说明 |
 |------|------|------|

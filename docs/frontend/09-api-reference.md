@@ -491,22 +491,22 @@ updateConfig(config: { [key: string]: LLMConfig }): Promise<{ status: string; me
 
 ---
 
-### updateJaazApiKey
+### updateJamesApiKey
 
-登录后更新 jaaz provider 的 api_key。
+登录后更新 James provider 的 api_key。
 
 ```typescript
-updateJaazApiKey(token: string): Promise<void>
+updateJamesApiKey(token: string): Promise<void>
 ```
 
 ---
 
-### clearJaazApiKey
+### clearJamesApiKey
 
-登出后清除 jaaz provider 的 api_key。
+登出后清除 James provider 的 api_key。
 
 ```typescript
-clearJaazApiKey(): Promise<void>
+clearJamesApiKey(): Promise<void>
 ```
 
 ---

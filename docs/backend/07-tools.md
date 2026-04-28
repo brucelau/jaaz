@@ -35,7 +35,7 @@ web/services/tool_service.py (Facade)
 
 ## tool_registry.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/tool_registry.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/tool_registry.py`
 
 内存工具注册表：
 
@@ -56,7 +56,7 @@ class ToolRegistry:
 
 ## tool_loader.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/tool_loader.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/tool_loader.py`
 
 工具加载器：
 
@@ -81,7 +81,7 @@ class ToolLoader:
 
 ## providers.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/providers.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/providers.py`
 
 Provider 工具映射常量：
 
@@ -107,7 +107,7 @@ PROVIDER_TOOLS = {
 
 ### write_plan
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/tools/write_plan.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/tools/write_plan.py`
 
 生成任务执行计划：
 
@@ -130,18 +130,18 @@ def write_plan(task: str) -> str:
 
 | 工具名 | Provider | 文件 |
 |--------|----------|------|
-| `generate_image_by_ideogram` | Ideogram | `generate_image_by_ideogram3_bal_jaaz.py` |
-| `generate_image_by_flux_1_1_pro` | Flux | `generate_image_by_flux_1_1_pro_jaaz.py` |
-| `generate_image_by_flux_kontext` | Flux | `generate_image_by_flux_kontext_jaaz.py` |
-| `generate_image_by_recraft` | Recraft | `generate_image_by_recraft_v3_jaaz.py` |
-| `generate_image_by_imagen` | Imagen | `generate_image_by_imagen_4_jaaz.py` |
-| `generate_image_by_doubao` | Doubao | `generate_image_by_doubao_seedream_3_jaaz.py` |
-| `generate_image_by_gpt_image` | GPT Image | `generate_image_by_gpt_image_1_jaaz.py` |
-| `generate_image_by_midjourney` | Midjourney | `generate_image_by_midjourney_jaaz.py` |
+| `generate_image_by_ideogram` | Ideogram | `generate_image_by_ideogram3_bal_James.py` |
+| `generate_image_by_flux_1_1_pro` | Flux | `generate_image_by_flux_1_1_pro_James.py` |
+| `generate_image_by_flux_kontext` | Flux | `generate_image_by_flux_kontext_James.py` |
+| `generate_image_by_recraft` | Recraft | `generate_image_by_recraft_v3_James.py` |
+| `generate_image_by_imagen` | Imagen | `generate_image_by_imagen_4_James.py` |
+| `generate_image_by_doubao` | Doubao | `generate_image_by_doubao_seedream_3_James.py` |
+| `generate_image_by_gpt_image` | GPT Image | `generate_image_by_gpt_image_1_James.py` |
+| `generate_image_by_midjourney` | Midjourney | `generate_image_by_midjourney_James.py` |
 
 ### 图片生成核心
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/tools/utils/image_generation_core.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/tools/utils/image_generation_core.py`
 
 ```python
 IMAGE_PROVIDERS = {
@@ -162,11 +162,11 @@ def generate_image(model_info: dict, prompt: str, **kwargs):
 
 ### 图片 Provider
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/tools/image_providers/`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/tools/image_providers/`
 
 | Provider | 文件 | 说明 |
 |----------|------|------|
-| Jaaz | `jaaz_provider.py` | Jaaz 云服务 |
+| James | `James_provider.py` | James 云服务 |
 | OpenAI | `openai_provider.py` | DALL-E |
 | NanoBanana | `nano_banana_provider.py` | 其他源 |
 
@@ -178,14 +178,14 @@ def generate_image(model_info: dict, prompt: str, **kwargs):
 
 | 工具名 | Provider | 文件 |
 |--------|----------|------|
-| `generate_video_by_kling_v2` | Kling | `generate_video_by_kling_v2_jaaz.py` |
-| `generate_video_by_veo3_fast` | Veo3 | `generate_video_by_veo3_fast_jaaz.py` |
-| `generate_video_by_seedance` | Seedance | `generate_video_by_seedance_v1_jaaz.py` |
-| `generate_video_by_hailuo_02` | Hailuo | `generate_video_by_hailuo_02_jaaz.py` |
+| `generate_video_by_kling_v2` | Kling | `generate_video_by_kling_v2_James.py` |
+| `generate_video_by_veo3_fast` | Veo3 | `generate_video_by_veo3_fast_James.py` |
+| `generate_video_by_seedance` | Seedance | `generate_video_by_seedance_v1_James.py` |
+| `generate_video_by_hailuo_02` | Hailuo | `generate_video_by_hailuo_02_James.py` |
 
 ### 视频生成核心
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/tools/video_generation/video_generation_core.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/tools/video_generation/video_generation_core.py`
 
 ```python
 VIDEO_PROVIDERS = {

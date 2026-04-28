@@ -16,7 +16,7 @@
 
 ## tool_model.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/models/tool_model.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/models/tool_model.py`
 
 ### ToolInfo
 
@@ -46,7 +46,7 @@ class ToolInfoJson(BaseModel):
 
 ## config_model.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/models/config_model.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/models/config_model.py`
 
 ### LLMConfig
 
@@ -84,7 +84,7 @@ class ConfigUpdate(BaseModel):
 
 ## auth_router.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/auth_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/auth_router.py`
 
 ### RegisterRequest
 
@@ -123,7 +123,7 @@ class UserInfo(BaseModel):
 
 ## chat_router.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/chat_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/chat_router.py`
 
 ### ChatRequest
 
@@ -179,7 +179,7 @@ class MagicRequest(BaseModel):
 
 ## canvas_router.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/canvas_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/canvas_router.py`
 
 ### CreateCanvasRequest
 
@@ -219,7 +219,7 @@ class CanvasResponse(BaseModel):
 
 ## image_router.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/image_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/image_router.py`
 
 ### UploadImageResponse
 
@@ -235,7 +235,7 @@ class UploadImageResponse(BaseModel):
 
 ## tool_confirmation_router.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/tool_confirmation_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/tool_confirmation_router.py`
 
 ### ToolConfirmationRequest
 
@@ -250,7 +250,7 @@ class ToolConfirmationRequest(BaseModel):
 
 ## settings_router.py
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/web/routers/settings_router.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/web/routers/settings_router.py`
 
 ### ProxyConfig
 

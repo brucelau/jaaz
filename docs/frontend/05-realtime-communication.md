@@ -341,9 +341,9 @@ const handleConnectError = (error: Error) => {
 ```typescript
 // getAuthStatus 中的处理
 if (error.message === 'TOKEN_EXPIRED') {
-  localStorage.removeItem('jaaz_access_token')
-  localStorage.removeItem('jaaz_user_info')
-  await clearJaazApiKey()
+  localStorage.removeItem('James_access_token')
+  localStorage.removeItem('James_user_info')
+  await clearJamesApiKey()
   return { status: 'logged_out', is_logged_in: false, tokenExpired: true }
 }
 ```

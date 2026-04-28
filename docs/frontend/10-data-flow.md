@@ -268,7 +268,7 @@ api/knowledge.ts
 api/config.ts
     ├── getConfig()
     ├── updateConfig()
-    └── used by: AuthContext (登录/登出时更新 jaaz api_key)
+    └── used by: AuthContext (登录/登出时更新 James api_key)
 ```
 
 ---
@@ -279,8 +279,8 @@ api/config.ts
 
 | Key | 类型 | 说明 |
 |-----|------|------|
-| `jaaz_access_token` | string | 认证 Token |
-| `jaaz_user_info` | string (JSON) | 用户信息 |
+| `James_access_token` | string | 认证 Token |
+| `James_user_info` | string (JSON) | 用户信息 |
 | `system_prompt` | string | 自定义系统提示词 |
 
 ### IndexedDB (React Query 缓存)

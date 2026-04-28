@@ -49,7 +49,7 @@ Agent 系统基于 **LangGraph** 实现多 Agent 编排，支持 Agent 间 hando
 
 ## Agent 创建流程
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/langgraph_service/agent_manager.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/langgraph_service/agent_manager.py`
 
 ```python
 class AgentManager:
@@ -84,7 +84,7 @@ class AgentManager:
 
 ## Handoff 机制
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/langgraph_service/configs/base_config.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/langgraph_service/configs/base_config.py`
 
 ```python
 def create_handoff_tool(agent_name: str, name=None, description=None):
@@ -131,7 +131,7 @@ _create_langgraph_agent(config, model, tools, system_prompt)
 
 ## 流式处理
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/agents/langgraph_service/stream_processor.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/agents/langgraph_service/stream_processor.py`
 
 ```python
 class StreamProcessor:

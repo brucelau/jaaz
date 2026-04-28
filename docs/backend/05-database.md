@@ -23,7 +23,7 @@ DB_PATH = <SERVER_DIR>/database/localmanus.db
 
 ## 连接池
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/database/db_service.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/database/db_service.py`
 
 ```python
 class ConnectionPool:
@@ -148,7 +148,7 @@ CREATE TABLE auth_tokens (
 
 ## 迁移系统
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/database/migrations/manager.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/database/migrations/manager.py`
 
 ```python
 CURRENT_VERSION = 5
@@ -241,7 +241,7 @@ delete_comfy_workflow(id)
 
 ## 设置服务 (settings_service.py)
 
-**文件**: `/Users/cyberway/ocworkspace/jaaz/server/database/settings_service.py`
+**文件**: `/Users/cyberway/ocworkspace/James/server/database/settings_service.py`
 
 ### 设置存储
 

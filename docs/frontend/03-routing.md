@@ -2,7 +2,7 @@
 
 ## 概述
 
-Jaaz 前端使用 **TanStack Router** 进行路由管理，采用**文件路由模式**。
+James 前端使用 **TanStack Router** 进行路由管理，采用**文件路由模式**。
 
 ## 路由定义
 

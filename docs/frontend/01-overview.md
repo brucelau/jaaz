@@ -2,9 +2,9 @@
 
 ## 一、项目概述
 
-Jaaz 是一个**桌面 AI 设计 Agent 应用**，前端基于 React + TypeScript + Vite 构建，使用 TanStack Router 进行路由管理，Socket.IO 进行实时通信。
+James 是一个**桌面 AI 设计 Agent 应用**，前端基于 React + TypeScript + Vite 构建，使用 TanStack Router 进行路由管理，Socket.IO 进行实时通信。
 
-**项目路径**: `/Users/cyberway/ocworkspace/jaaz/react`
+**项目路径**: `/Users/cyberway/ocworkspace/James/react`
 
 ### 核心功能
 - 🎨 **Canvas 画布** - 基于 Excalidraw 的可视化设计画布
@@ -97,7 +97,7 @@ Jaaz 是一个**桌面 AI 设计 Agent 应用**，前端基于 React + TypeScrip
 
 ```bash
 # 安装依赖
-cd jaaz/react
+cd James/react
 npm install
 
 # 开发模式

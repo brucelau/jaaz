@@ -259,7 +259,7 @@ const handleMagicGenerate = async (imageData: string) => {
 ```typescript
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 
-<ResizablePanelGroup direction="horizontal" autoSaveId="jaaz-chat-panel">
+<ResizablePanelGroup direction="horizontal" autoSaveId="James-chat-panel">
   <ResizablePanel defaultSize={75}>
     <CanvasExcali />
   </ResizablePanel>

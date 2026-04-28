@@ -32,7 +32,7 @@ server/
 │   │   ├── magic_service.py       # 魔法生成
 │   │   ├── knowledge_service.py   # 知识库
 │   │   ├── log_service.py         # 日志
-│   │   ├── jaaz_service.py        # Jaaz 云 API 客户端
+│   │   ├── James_service.py        # James 云 API 客户端
 │   │   ├── comfyui_execution_service.py  # ComfyUI 执行
 │   │   └── stream_service.py      # 流式任务注册表
 │   │
@@ -83,7 +83,7 @@ server/
 │   │   ├── generate_video_by_*.py  # 视频生成工具
 │   │   ├── image_providers/       # 图片 Provider
 │   │   │   ├── __init__.py
-│   │   │   ├── jaaz_provider.py   # Jaaz Provider
+│   │   │   ├── James_provider.py   # James Provider
 │   │   │   ├── openai_provider.py  # OpenAI Provider
 │   │   │   └── nano_banana_provider.py
 │   │   ├── utils/
@@ -140,7 +140,7 @@ server/
 | `magic_service.py` | 魔法生成编排 |
 | `knowledge_service.py` | 知识库数据访问 |
 | `log_service.py` | 结构化日志 |
-| `jaaz_service.py` | Jaaz 云 API 客户端 |
+| `James_service.py` | James 云 API 客户端 |
 | `comfyui_execution_service.py` | ComfyUI 工作流执行 |
 | `stream_service.py` | 流式任务注册表 (session_id → task) |
 

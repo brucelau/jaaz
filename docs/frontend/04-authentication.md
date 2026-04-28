@@ -107,8 +107,8 @@ interface DeviceAuthPollResponse {
 
 ```typescript
 export async function getAuthStatus(): Promise<AuthStatus> {
-  const token = localStorage.getItem('jaaz_access_token')
-  const userInfo = localStorage.getItem('jaaz_user_info')
+  const token = localStorage.getItem('James_access_token')
+  const userInfo = localStorage.getItem('James_user_info')
 
   if (token && userInfo) {
     try {
@@ -121,18 +121,18 @@ export async function getAuthStatus(): Promise<AuthStatus> {
           const data = await response.json()
           if (data.valid === false) {
             // Token 无效，移除
-            localStorage.removeItem('jaaz_access_token')
-            localStorage.removeItem('jaaz_user_info')
+            localStorage.removeItem('James_access_token')
+            localStorage.removeItem('James_user_info')
             return { status: 'logged_out', is_logged_in: false }
           }
           if (data.new_token) {
-            localStorage.setItem('jaaz_access_token', data.new_token)
+            localStorage.setItem('James_access_token', data.new_token)
           }
         }
       } else {
         // 设备码 Token 刷新
         const newToken = await refreshToken(token)
-        localStorage.setItem('jaaz_access_token', newToken)
+        localStorage.setItem('James_access_token', newToken)
       }
 
       return {
@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 const handleLogin = async (username: string, password: string) => {
   const { token, user_info } = await auth_login(username, password)
   saveAuthData(token, user_info)
-  await updateJaazApiKey(token)
+  await updateJamesApiKey(token)
   refreshAuth()
 }
 ```
@@ -236,17 +236,17 @@ const pollAuth = async (code: string) => {
 
 ```typescript
 // localStorage keys
-'jaaz_access_token'   // Token 字符串
-'jaaz_user_info'      // UserInfo JSON 字符串
+'James_access_token'   // Token 字符串
+'James_user_info'      // UserInfo JSON 字符串
 ```
 
 ## 登出
 
 ```typescript
 export async function logout(): Promise<void> {
-  localStorage.removeItem('jaaz_access_token')
-  localStorage.removeItem('jaaz_user_info')
-  await clearJaazApiKey()
+  localStorage.removeItem('James_access_token')
+  localStorage.removeItem('James_user_info')
+  await clearJamesApiKey()
 }
 ```
 
@@ -278,10 +278,10 @@ export async function authenticatedFetch(
 
 ```typescript
 // api/config.ts
-export async function updateJaazApiKey(token: string): Promise<void> {
+export async function updateJamesApiKey(token: string): Promise<void> {
   const config = await getConfig()
-  if (config.jaaz) {
-    config.jaaz.api_key = token
+  if (config.James) {
+    config.James.api_key = token
     await updateConfig(config)
   }
 }
